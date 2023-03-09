@@ -12,7 +12,6 @@ namespace IotSupplyStore.Models
         public string Email { get; set; }
         public string Password { get; set; }
         public string status { get; set; }
-        public ICollection<Suppliers> Suppliers { get; set; }
         public ICollection<Category> Category { get; set; }
     }
 }
