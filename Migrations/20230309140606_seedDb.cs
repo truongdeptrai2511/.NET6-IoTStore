@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IotSupplyStore.Migrations
 {
     /// <inheritdoc />
-    public partial class AddDatabase : Migration
+    public partial class seedDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -50,6 +50,24 @@ namespace IotSupplyStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Suppliers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    S_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    S_Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    S_Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    S_Fax = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Suppliers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Categories",
                 columns: table => new
                 {
@@ -70,31 +88,6 @@ namespace IotSupplyStore.Migrations
                         column: x => x.UserId,
                         principalTable: "AdminUsers",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Suppliers",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    S_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    S_Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    S_Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    S_Fax = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Suppliers", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Suppliers_AdminUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AdminUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -119,6 +112,38 @@ namespace IotSupplyStore.Migrations
                         name: "FK_Orders_Customers_CustomerId",
                         column: x => x.CustomerId,
                         principalTable: "Customers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Products",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<int>(type: "int", nullable: false),
+                    P_Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    P_Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    P_Quantity = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Products", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Products_Categories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "Categories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Products_Suppliers_SupplierId",
+                        column: x => x.SupplierId,
+                        principalTable: "Suppliers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -154,7 +179,7 @@ namespace IotSupplyStore.Migrations
                         column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -174,43 +199,10 @@ namespace IotSupplyStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_DetailsProducts", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Products",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    DetailProductId = table.Column<int>(type: "int", nullable: false),
-                    P_Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    P_Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    P_Quantity = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Products", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Products_Categories_CategoryId",
-                        column: x => x.CategoryId,
-                        principalTable: "Categories",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Products_DetailsProducts_DetailProductId",
-                        column: x => x.DetailProductId,
-                        principalTable: "DetailsProducts",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
-                    table.ForeignKey(
-                        name: "FK_Products_Suppliers_SupplierId",
-                        column: x => x.SupplierId,
-                        principalTable: "Suppliers",
+                        name: "FK_DetailsProducts_Products_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Products",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -290,19 +282,9 @@ namespace IotSupplyStore.Migrations
                 column: "CategoryId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Products_DetailProductId",
-                table: "Products",
-                column: "DetailProductId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Products_SupplierId",
                 table: "Products",
                 column: "SupplierId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Suppliers_UserId",
-                table: "Suppliers",
-                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Transactions_CustomerId",
@@ -313,30 +295,13 @@ namespace IotSupplyStore.Migrations
                 name: "IX_Transactions_OrderId",
                 table: "Transactions",
                 column: "OrderId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_DetailsProducts_Products_ProductId",
-                table: "DetailsProducts",
-                column: "ProductId",
-                principalTable: "Products",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Categories_AdminUsers_UserId",
-                table: "Categories");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_Suppliers_AdminUsers_UserId",
-                table: "Suppliers");
-
-            migrationBuilder.DropForeignKey(
-                name: "FK_DetailsProducts_Products_ProductId",
-                table: "DetailsProducts");
+            migrationBuilder.DropTable(
+                name: "DetailsProducts");
 
             migrationBuilder.DropTable(
                 name: "Images");
@@ -348,25 +313,22 @@ namespace IotSupplyStore.Migrations
                 name: "Transactions");
 
             migrationBuilder.DropTable(
+                name: "Products");
+
+            migrationBuilder.DropTable(
                 name: "Orders");
+
+            migrationBuilder.DropTable(
+                name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "Suppliers");
 
             migrationBuilder.DropTable(
                 name: "Customers");
 
             migrationBuilder.DropTable(
                 name: "AdminUsers");
-
-            migrationBuilder.DropTable(
-                name: "Products");
-
-            migrationBuilder.DropTable(
-                name: "Categories");
-
-            migrationBuilder.DropTable(
-                name: "DetailsProducts");
-
-            migrationBuilder.DropTable(
-                name: "Suppliers");
         }
     }
 }
