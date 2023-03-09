@@ -10,6 +10,8 @@ using IotSupplyStore.Models;
 
 namespace IotSupplyStore.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class ProductController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -18,17 +20,18 @@ namespace IotSupplyStore.Controllers
         {
             _context = context;
         }
-        [HttpGet]
+        [HttpGet("GetProducts")]
         public ActionResult<List<Product>> GetProducts()
         {
             var products = ProductFakeApi.GenerateProducts(10);
             return Ok(products);
         }
-        /*        [HttpGet]
-                public async Task<ActionResult<IEnumerable<Product>>> GetProducts() //Get all product database 
-                {
-                    return await _context.Products.ToListAsync();
-                }*/
+
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProducts() //Get all product database 
+        //{
+        //    return await _context.Products.ToListAsync();
+        //}
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)// Get product by Id
