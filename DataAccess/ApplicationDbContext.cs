@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IotSupplyStore.DataAccess
 {
-    public class ApplicationDbContext : DbContext
+    public class ApplicationDbContext : DbContext /*Lop ke thua DBContext de xu ly các thao tac voi csdl*/
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<AdminUser> AdminUsers { get; set; }
@@ -15,12 +15,13 @@ namespace IotSupplyStore.DataAccess
         public DbSet<Order> Orders { get; set; }
         public DbSet<Suppliers> Suppliers { get; set; }
         public DbSet<Transactions> Transactions { get; set; }
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder) /*Cau hinh cac quan he giua cac bang trong csdl*/
         {
+            /*Product n - n voi order nen su dung HasMany va UsingEntity de dat ten cho bang lien ket giua hai bang nay*/
             modelBuilder.Entity<Product>()
                         .HasMany(p => p.Orders)
                         .WithMany(c => c.Products)
                         .UsingEntity(j => j.ToTable("ProductOrder"));
         }
-    }
+}
 }
