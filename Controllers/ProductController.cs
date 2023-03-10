@@ -20,18 +20,11 @@ namespace IotSupplyStore.Controllers
         {
             _context = context;
         }
-        [HttpGet("GetProducts")]
-        public ActionResult<List<Product>> GetProducts()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts() //Get all product database 
         {
-            var products = ProductFakeApi.GenerateProducts(10);
-            return Ok(products);
+            return await _context.Products.ToListAsync();
         }
-
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Product>>> GetProducts() //Get all product database 
-        //{
-        //    return await _context.Products.ToListAsync();
-        //}
 
         [HttpGet("{id}")]
         public async Task<ActionResult<Product>> GetProduct(int id)// Get product by Id
