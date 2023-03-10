@@ -7,7 +7,6 @@ namespace IotSupplyStore.Models
     {
         [Key]
         public int Id { get; set; }
-        public int UserId { get; set; }
         public string S_Name { get; set; }
         public string S_Email { get; set; }
         public string S_Phone { get; set; }
@@ -15,7 +14,5 @@ namespace IotSupplyStore.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
         public ICollection<Product> ProductList { get; set; }
-        [ForeignKey("UserId")]
-        public AdminUser AdminUser { get; set; }
     }
 }
