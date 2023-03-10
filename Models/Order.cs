@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IotSupplyStore.DataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace IotSupplyStore.Models
 {
@@ -20,4 +22,6 @@ namespace IotSupplyStore.Models
         public ICollection<Transactions> Transactions { get; set; }
         public ICollection<Product> Products { get; set; }
     }
+
 }
+

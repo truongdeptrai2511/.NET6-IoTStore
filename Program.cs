@@ -1,5 +1,7 @@
 using IotSupplyStore.DataAccess;
 using Microsoft.EntityFrameworkCore;
+using IotSupplyStore.Controllers;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +31,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
+app.UseAuthentication();
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 
