@@ -9,25 +9,25 @@ namespace IotSupplyStore.Controllers
     [Authorize]
     public class AuthTestController : ControllerBase
     {
-        [HttpGet]
+        [HttpGet("CheckAuthentication")]
         public IActionResult CheckAuthentication()
         {
             return Ok("authencation success!");
         }
         [Authorize(Roles = SD.Role_Admin)]
-        [HttpGet("{id:int}")]
-        public IActionResult CheckAdmin(int id = 1)
+        [HttpGet("CheckIsAdmin")]
+        public IActionResult CheckAdmin()
         {
             return Ok("role admin");
         }
         [Authorize(Roles = SD.Role_Employee)]
-        [HttpPost]
-        public IActionResult CheckEmp(int id)
+        [HttpPost("CheckIsEmployee")]
+        public IActionResult CheckEmp()
         {
-            return Ok("role emp");
+            return Ok("Role Employee");
         }
         [Authorize(Roles = SD.Role_Customer)]
-        [HttpPut]
+        [HttpPut("CheckIsCustomer")]
         public IActionResult CheckCustomer()
         {
             return Ok("Role customer");
