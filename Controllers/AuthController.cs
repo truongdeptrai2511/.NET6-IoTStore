@@ -101,7 +101,7 @@ namespace IotSupplyStore.Controllers
 
         [Authorize(Roles = SD.Role_Admin)]
         [HttpPost("register/employee")]
-        public async Task<IActionResult> RegisterEmployee(EmployeeRegisterRequestDTO empRequest)
+        public async Task<IActionResult> RegisterEmployee(EmployeeRequest empRequest)
         {
             ApplicationUser newUser = new()
             {
@@ -111,11 +111,12 @@ namespace IotSupplyStore.Controllers
                 FullName = empRequest.Name,
                 PhoneNumber = empRequest.PhoneNumber,
                 Address = empRequest.Address,
-                citizenIdentification = empRequest.citizenIdentification,
+                citizenIdentification = empRequest.citizenIdentification
             };
+            string FirstPassword = "abcde12345";
             try
             {
-                var result = await _userManager.CreateAsync(newUser, empRequest.Password);
+                var result = await _userManager.CreateAsync(newUser, FirstPassword);
                 if (result.Succeeded)
                 {
                     if (!_roleManager.RoleExistsAsync(SD.Role_Employee).GetAwaiter().GetResult())

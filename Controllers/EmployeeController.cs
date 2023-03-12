@@ -67,6 +67,7 @@ namespace IotSupplyStore.Controllers
 
             var newEmployeeRequest = new EmployeeRequest()
             {
+                UserName = model.UserName,
                 Name = model.Name,
                 Email = model.Email,
                 PhoneNumber = model.PhoneNumber,
