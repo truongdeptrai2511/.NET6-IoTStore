@@ -13,5 +13,7 @@ namespace IotSupplyStore.Models
         public string Address { get; set; }
         [Required]
         public string citizenIdentification { get; set; } //REQUIRED
+
+        public DateTime RequestAt { get; set; } = DateTime.Now;
     }
 }
