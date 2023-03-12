@@ -15,6 +15,7 @@ namespace IotSupplyStore.Controllers
 {
     [Route("api/auth")]
     [ApiController]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
@@ -36,8 +37,8 @@ namespace IotSupplyStore.Controllers
         {
             ApplicationUser newAdmin = new()
             {
-                UserName = model.Name.ToLower(),
-                FullName = model.Name
+                UserName = model.UserName,
+                FullName = model.FullName
             };
             try
             {
@@ -69,9 +70,9 @@ namespace IotSupplyStore.Controllers
                 return BadRequest("This user has already exist!!!");
             }
 
-            ApplicationUser newUser = new()
+            ApplicationUser newUser = new ApplicationUser()
             {
-                UserName = model.Name.ToLower(),
+                UserName = model.UserName,
                 Email = model.Email,
                 NormalizedEmail = model.Email.ToUpper(),
                 FullName = model.Name,
@@ -104,7 +105,7 @@ namespace IotSupplyStore.Controllers
         {
             ApplicationUser newUser = new()
             {
-                UserName = empRequest.UserName.ToLower(),
+                UserName = empRequest.UserName,
                 Email = empRequest.Email,
                 NormalizedEmail = empRequest.Email.ToUpper(),
                 FullName = empRequest.Name,
@@ -133,6 +134,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
             ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
