@@ -8,10 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
 using IotSupplyStore.Models.UpsertModel;
+using Microsoft.AspNetCore.Authorization;
+using IotSupplyStore.Utility;
 
 namespace IotSupplyStore.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -23,6 +26,7 @@ namespace IotSupplyStore.Controllers
         }
 
         // GET: api/Category
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
         {
@@ -31,6 +35,7 @@ namespace IotSupplyStore.Controllers
 
         // GET: api/Category/5
         [HttpGet("{id}")]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<ActionResult<Category>> GetCategory(int id)
         {
             var category = await _db.Categories.FindAsync(id);
@@ -45,6 +50,7 @@ namespace IotSupplyStore.Controllers
 
         // PUT: api/Category/5
         [HttpPut("{id}")]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> PutCategory(int id, Category category)
         {
             if (id != category.Id)
@@ -76,6 +82,7 @@ namespace IotSupplyStore.Controllers
 
         // POST: api/Category
         [HttpPost]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<ActionResult<Category>> PostCategory(CategoryUpsert category)
         {
             Category newCategory = new Category()
@@ -92,6 +99,7 @@ namespace IotSupplyStore.Controllers
 
         // DELETE: api/Category/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _db.Categories.FindAsync(id);
