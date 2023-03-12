@@ -8,6 +8,8 @@ using System.Security.Claims;
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace IotSupplyStore.Controllers
 {
@@ -27,10 +29,41 @@ namespace IotSupplyStore.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
-        [HttpPost("register/customer")] //For Customer
-        public async Task<IActionResult> Register([FromBody] CustomerRegisterRequestDTO model)
+
+        [Authorize(Roles = SD.Role_Admin)]
+        [HttpPost("register/admin")]
+        public async Task<IActionResult> RegisterAdmin(AdminRegisterRequestDTO model)
         {
-            ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
+            ApplicationUser newAdmin = new()
+            {
+                UserName = model.Name.ToLower(),
+                FullName = model.Name
+            };
+            try
+            {
+                var result = await _userManager.CreateAsync(newAdmin, model.Password);
+                if (result.Succeeded)
+                {
+                    if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                    }
+                    await _userManager.AddToRoleAsync(newAdmin, SD.Role_Admin);
+                    return Ok("Admin registered");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return BadRequest("please re-check the information");
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register/customer")] //For Customer
+        public async Task<IActionResult> RegisterCustomer([FromBody] CustomerRegisterRequestDTO model)
+        {
+            ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.FullName.ToLower() == model.Name.ToLower());
             if (userFromDb != null)
             {
                 return BadRequest("This user has already exist!!!");
@@ -38,7 +71,7 @@ namespace IotSupplyStore.Controllers
 
             ApplicationUser newUser = new()
             {
-                UserName = model.UserName,
+                UserName = model.Name.ToLower(),
                 Email = model.Email,
                 NormalizedEmail = model.Email.ToUpper(),
                 FullName = model.Name,
@@ -50,28 +83,10 @@ namespace IotSupplyStore.Controllers
                 var result = await _userManager.CreateAsync(newUser, model.Password);
                 if (result.Succeeded)
                 {
-                    if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                    if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
                     }
-                    //if (model.Role.ToLower() == SD.Role_Admin)
-                    //{
-                    //    await _userManager.AddToRoleAsync(newUser, SD.Role_Admin);
-                    //}
-                    //else if (model.Role.ToLower() == SD.Role_Employee)
-                    //{
-                    //    await _userManager.AddToRoleAsync(newUser, SD.Role_Employee);
-                    //}
-                    //else if (model.Role.ToLower() == SD.Role_Customer)
-                    //{
-                    //    await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
-                    //}
-                    //else
-                    //{
-                    //    return BadRequest();
-                    //}
                     await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
                     return Ok("Registered");
                 }
@@ -82,50 +97,41 @@ namespace IotSupplyStore.Controllers
             }
             return BadRequest();
         }
-        [HttpPost("register/employee")] //For Employee Request
-        public async Task<IActionResult> RegisterEmployee([FromBody] EmployeeRegisterRequestDTO model)
-        {
-            ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
-            if (userFromDb != null)
-            {
-                return BadRequest("This user has already exist!!!");
-            }
-            if (model.citizenIdentification == null)
-            {
-                return BadRequest("This employee must have Citizen Identification");
-            }
 
+        [Authorize(Roles = SD.Role_Admin)]
+        [HttpPost("register/employee")]
+        public async Task<IActionResult> RegisterEmployee(EmployeeRegisterRequestDTO empRequest)
+        {
             ApplicationUser newUser = new()
             {
-                UserName = model.UserName,
-                Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper(),
-                FullName = model.Name,
-                PhoneNumber = model.PhoneNumber,
-                Address = model.Address,
-                citizenIdentification = model.citizenIdentification,
+                UserName = empRequest.UserName.ToLower(),
+                Email = empRequest.Email,
+                NormalizedEmail = empRequest.Email.ToUpper(),
+                FullName = empRequest.Name,
+                PhoneNumber = empRequest.PhoneNumber,
+                Address = empRequest.Address,
+                citizenIdentification = empRequest.citizenIdentification,
             };
             try
             {
-                var result = await _userManager.CreateAsync(newUser, model.Password);
+                var result = await _userManager.CreateAsync(newUser, empRequest.Password);
                 if (result.Succeeded)
                 {
-                    if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                    if (!_roleManager.RoleExistsAsync(SD.Role_Employee).GetAwaiter().GetResult())
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
                     }
                     await _userManager.AddToRoleAsync(newUser, SD.Role_Employee);
-                    return Ok("Registered");
+                    return Ok("Employee registered");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
-            return BadRequest();
+            return BadRequest("please re-check the information");
         }
+
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
