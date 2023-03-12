@@ -67,7 +67,7 @@ namespace IotSupplyStore.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoryExists(id))
+                if (!CategoryExists(category.C_Name))
                 {
                     return NotFound();
                 }
