@@ -85,6 +85,10 @@ namespace IotSupplyStore.Controllers
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<ActionResult<Category>> PostCategory(CategoryUpsert category)
         {
+            if (!CategoryExists(category.C_Name))
+            {
+                return BadRequest("This category has already exist");
+            }
             Category newCategory = new Category()
             {
                 C_Name = category.C_Name,
@@ -114,9 +118,9 @@ namespace IotSupplyStore.Controllers
             return NoContent();
         }
 
-        private bool CategoryExists(int id)
+        private bool CategoryExists(string name)
         {
-            return _db.Categories.Any(e => e.Id == id);
+            return _db.Categories.Any(e => e.C_Name == name);
         }
     }
 }
