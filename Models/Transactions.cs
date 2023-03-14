@@ -7,8 +7,8 @@ namespace IotSupplyStore.Models
     {
         [Key]
         public int Id { get; set; }
-        public int CustomerId { get; set; }
         public int OrderId { get; set; }
+        public string ApplicationUserId { get; set; }
         public int Tr_Total { get; set; }
         public string Tr_Note { get; set; }
         public string Tr_Address { get; set; }
@@ -17,8 +17,8 @@ namespace IotSupplyStore.Models
         public string Tr_Status { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        [ForeignKey("CustomerId")]
-        public Customer Customer { get; set; }
+        [ForeignKey("ApplicationUserId")]
+        public ApplicationUser ApplicationUser { get; set; }
         [ForeignKey("OrderId")]
         public Order Order { get; set; }
     }

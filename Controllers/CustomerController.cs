@@ -2,13 +2,20 @@
 using IotSupplyStore.Models;
 using IotSupplyStore.Models.UpsertModel;
 using IotSupplyStore.Models.ViewModel;
+using IotSupplyStore.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
+
+// TODO
+
+
 
 namespace IotSupplyStore.Controllers
 {
     [Route("api/customer")]
-    //[Authorize] // Uncomment if has the identity
+    [Authorize]
     [ApiController]
     public class CustomerController : ControllerBase
     {
@@ -18,24 +25,26 @@ namespace IotSupplyStore.Controllers
             _db = db;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Customer>>> GetAllCustomers()
+        [Authorize(Roles = SD.Role_Admin)]
+        public async Task<IActionResult> GetAllCustomers()
         {
-            return await _db.Customers.ToListAsync();
+            var model = await _db.User.ToListAsync();
+            return Ok(model);
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCustomer(int id)
+        [Authorize(Roles = SD.Role_Customer + "," + SD.Role_Admin)]
+        public async Task<IActionResult> GetCustomer(string id)
         {
-            var obj = await _db.Customers.FirstOrDefaultAsync(x => x.Id == id);
+            var obj = await _db.User.FirstOrDefaultAsync(x => x.Id == id);
             if (obj == null)
             {
-                return NotFound($"Customer with id {id} is null");
+                return NotFound($"User is null");
             }
 
-            CustomerVM result = new CustomerVM()
+            UserVM result = new UserVM()
             {
-                Id = id,
                 FullName = obj.FullName,
-                Phone = obj.Phone,
+                Phone = obj.PhoneNumber,
                 Email = obj.Email,
                 Avatar = obj.Avatar,
                 Address = obj.Address,
@@ -47,64 +56,43 @@ namespace IotSupplyStore.Controllers
             return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> AddCustomer(CustomerUpsert newCustomer)
-        {
-            var checkExistCustomer = await _db.Customers.FirstOrDefaultAsync(u => u.FullName == newCustomer.FullName);
-            if (checkExistCustomer != null)
-            {
-                return BadRequest("This Customer has already exist");
-            }
-            Customer customer = new Customer()
-            {
-                FullName = newCustomer.FullName,
-                Phone = newCustomer.Phone,
-                Email = newCustomer.Email,
-                Avatar = newCustomer.Avatar,
-                Address = newCustomer.Address,
-                Password = newCustomer.Password
-            };
-            await _db.Customers.AddAsync(customer);
-            await _db.SaveChangesAsync();
-            //return Ok("Customer added");
-            return CreatedAtAction("GetCustomer", new { id = customer.Id }, customer);
-        }
+        [Authorize(Roles = SD.Role_Customer + "," + SD.Role_Admin)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCustomer(int id, CustomerUpsert customerUpsert)
+        public async Task<IActionResult> UpdateCustomer(string id, UserUpsert customerUpsert)
         {
-            var ExistCustomer = await _db.Customers.FirstOrDefaultAsync(u => u.Id == id);
+            var ExistCustomer = await _db.User.FirstOrDefaultAsync(u => u.Id == id);
             if (ExistCustomer == null)
             {
-                return NotFound($"Customer with id {id} is null");
+                return NotFound($"User is null");
             }
 
             ExistCustomer.FullName = customerUpsert.FullName;
-            ExistCustomer.Phone = customerUpsert.Phone;
+            ExistCustomer.PhoneNumber = customerUpsert.Phone;
             ExistCustomer.Email = customerUpsert.Email;
             ExistCustomer.Avatar = customerUpsert.Avatar;
             ExistCustomer.Address = customerUpsert.Address;
-            ExistCustomer.Password = customerUpsert.Password;
             ExistCustomer.UpdatedAt = DateTime.Now;
 
             _db.Entry(ExistCustomer).State = EntityState.Modified;
             await _db.SaveChangesAsync();
-            return Ok("Customer updated");
+            return Ok("ApplicationUser updated");
         }
 
         // DELETE: /users/1
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
-            var user = await _db.Customers.FindAsync(id);
+            var user = await _db.User.FindAsync(id);
 
             if (user == null)
             {
-                return NotFound($"Customer with id {id} is null");
+                return NotFound($"ApplicationUser with id {id} is null");
             }
 
-            _db.Customers.Remove(user);
+            _db.User.Remove(user);
             await _db.SaveChangesAsync();
-            return Ok("Customer deleted");
+            return Ok("ApplicationUser deleted");
         }
     }
 }

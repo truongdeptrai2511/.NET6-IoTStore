@@ -12,8 +12,9 @@ namespace IotSupplyStore.Models
         public string C_Nameoperty { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        [ForeignKey("UserId")]
-        public AdminUser AdminUser { get; set; }
+        public string ApplicationUserId { get; set; }
+        [ForeignKey("ApplicationUserId")]
+        public ApplicationUser ApplicationUser { get; set; }
         public ICollection<Product> Products { get; set; }
     }
 }
