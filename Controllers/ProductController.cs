@@ -56,6 +56,7 @@ namespace IotSupplyStore.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> PostProduct(Product product)   //Add a new product to the database 
         {
+            product.Suppliers = null;
             _context.Products.Add(new Product
             {
                 Id = product.Id,

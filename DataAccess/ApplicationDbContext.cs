@@ -15,14 +15,16 @@ namespace IotSupplyStore.DataAccess
         public DbSet<Suppliers> Suppliers { get; set; }
         public DbSet<Transactions> Transactions { get; set; }
         public DbSet<ApplicationUser> User { get; set; }
+        public DbSet<ProductOrder> ProductOrders { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<Product>()
-                        .HasMany(p => p.Orders)
-                        .WithMany(c => c.Products)
-                        .UsingEntity(j => j.ToTable("ProductOrder"));
+            //modelBuilder.Entity<Product>()
+            //            .HasMany(p => p.Orders)
+            //            .WithMany(c => c.Products)
+            //            .UsingEntity(j => j.ToTable("ProductOrder"));
         }
     }
 }

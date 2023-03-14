@@ -19,6 +19,7 @@ namespace IotSupplyStore.Models
         public Suppliers Suppliers { get; set; }
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
-        public ICollection<Order> Orders { get; set; }
+        //public ICollection<Order> Orders { get; set; }
+        public ICollection<ProductOrder> ProductOrders { get; set; }
     }
 }

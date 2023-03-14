@@ -32,7 +32,7 @@ namespace IotSupplyStore.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrder(int id)
         {
-            var order = await _context.Orders.FindAsync(id);
+            var order = await _context.Orders.AsNoTracking().Include(x => x.ProductOrders).ThenInclude(x => x.Product).SingleOrDefaultAsync(x => x.Id == id);
 
             if (order == null)
             {
@@ -45,14 +45,19 @@ namespace IotSupplyStore.Controllers
         // PUT: api/Orders/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutOrder(int id, Order order)
+        public async Task<IActionResult> PutOrder(int id, Order orderDto)
         {
-            if (id != order.Id)
+            if (id != orderDto.Id)
             {
                 return BadRequest();
             }
-
-            _context.Entry(order).State = EntityState.Modified;
+            var order = await _context.Orders.SingleOrDefaultAsync(x => x.Id == orderDto.Id);
+            order.Or_Quantity = orderDto.Or_Quantity;
+            order.ProductOrders = orderDto.ProductOrders.Select(x => new ProductOrder
+            {
+                ProductId = x.ProductId
+            }).ToList();
+            //_context.Entry(order).State = EntityState.Modified;
 
             try
             {
@@ -78,10 +83,22 @@ namespace IotSupplyStore.Controllers
         [HttpPost]
         public async Task<ActionResult<Order>> PostOrder(Order order)
         {
+            var userid = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
+            var orderCreate = new Order
+            {
+                Or_Price = order.Or_Price,
+                Or_PriceSale = order.Or_PriceSale,
+                Or_Quantity = order.Or_Quantity,
+                ApplicationUserId = userid,
+                ProductOrders = order.ProductOrders.Select(x => new ProductOrder
+                {
+                    ProductId = x.ProductId
+                }).ToList()
+            };
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetOrder", new { id = order.Id }, order);
+            order.ProductOrders.ForEach(x => x.Order = null);
+            return order;
         }
 
         // DELETE: api/Orders/5

@@ -4,6 +4,7 @@ using IotSupplyStore.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IotSupplyStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230314083532_AddPO")]
+    partial class AddPO
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -135,7 +138,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Categories", (string)null);
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.DetailProduct", b =>
@@ -171,7 +174,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("DetailsProducts", (string)null);
+                    b.ToTable("DetailsProducts");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Images", b =>
@@ -192,7 +195,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Images", (string)null);
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
@@ -231,7 +234,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Product", b =>
@@ -272,7 +275,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.ProductOrder", b =>
@@ -295,7 +298,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOrders", (string)null);
+                    b.ToTable("ProductOrders");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Suppliers", b =>
@@ -326,7 +329,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Transactions", b =>
@@ -373,7 +376,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
