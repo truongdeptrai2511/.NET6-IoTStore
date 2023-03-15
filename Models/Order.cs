@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using IotSupplyStore.DataAccess;
+using Microsoft.EntityFrameworkCore;
 
 namespace IotSupplyStore.Models
 {
@@ -16,12 +18,15 @@ namespace IotSupplyStore.Models
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-
+      
         public string ApplicationUserId { get; set; }
         [ForeignKey("ApplicationUserId")]
         public ApplicationUser ApplicationUser { get; set; }
         
         public ICollection<Transactions> Transactions { get; set; }
-        public ICollection<Product> Products { get; set; }
+        //public ICollection<Product> Products { get; set; }
+        public List<ProductOrder> ProductOrders { get; set; }
     }
+
 }
+
