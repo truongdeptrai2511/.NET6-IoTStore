@@ -10,7 +10,6 @@ namespace IotSupplyStore.Models
         [Key]
         public int Id { get; set; }
         public int TransactionId { get; set; }
-        public int ProductId { get; set; }
         public int Or_Quantity { get; set; }
         public float Or_Price { get; set; }
         public float Or_PriceSale { get; set; }
