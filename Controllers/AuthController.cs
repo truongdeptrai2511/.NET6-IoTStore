@@ -42,7 +42,15 @@ namespace IotSupplyStore.Controllers
             };
             try
             {
-                var result = await _userManager.CreateAsync(newAdmin, model.Password);
+                IdentityResult result;
+                try
+                {
+                    result = await _userManager.CreateAsync(newAdmin, model.Password);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Problem occurs when assign username or full name! Please re-check again!");
+                }
                 if (result.Succeeded)
                 {
                     if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
@@ -81,7 +89,15 @@ namespace IotSupplyStore.Controllers
             };
             try
             {
-                var result = await _userManager.CreateAsync(newUser, model.Password);
+                IdentityResult result;
+                try
+                {
+                    result = await _userManager.CreateAsync(newUser, model.Password);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Problem occurs when assign username or full name! Please re-check again!");
+                }
                 if (result.Succeeded)
                 {
                     if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
@@ -96,14 +112,14 @@ namespace IotSupplyStore.Controllers
             {
                 Console.WriteLine(ex);
             }
-            return BadRequest();
+            return BadRequest("Failed to register new user!");
         }
 
         [Authorize(Roles = SD.Role_Admin)]
         [HttpPost("register/employee")]
         public async Task<IActionResult> RegisterEmployee(EmployeeRequest empRequest)
         {
-            ApplicationUser newUser = new()
+            ApplicationUser newEmployee = new()
             {
                 UserName = empRequest.UserName,
                 Email = empRequest.Email,
@@ -116,14 +132,22 @@ namespace IotSupplyStore.Controllers
             string FirstPassword = "abcde12345";
             try
             {
-                var result = await _userManager.CreateAsync(newUser, FirstPassword);
+                IdentityResult result;
+                try
+                {
+                    result = await _userManager.CreateAsync(newEmployee, FirstPassword);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Problem occurs when assign username or full name! Please re-check again!");
+                }
                 if (result.Succeeded)
                 {
                     if (!_roleManager.RoleExistsAsync(SD.Role_Employee).GetAwaiter().GetResult())
                     {
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
                     }
-                    await _userManager.AddToRoleAsync(newUser, SD.Role_Employee);
+                    await _userManager.AddToRoleAsync(newEmployee, SD.Role_Employee);
                     return Ok("Employee registered");
                 }
             }

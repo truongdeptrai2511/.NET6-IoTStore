@@ -2,7 +2,7 @@
 
 namespace IotSupplyStore.Models.UpsertModel
 {
-    public class CategoryUpsert
+    public class CategoryUpsert // update or create
     {
         public string C_Name { get; set; }
         public string C_Home { get; set; }
