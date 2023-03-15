@@ -30,20 +30,21 @@ namespace IotSupplyStore.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    FullName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Avatar = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FullName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Avatar = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    citizenIdentification = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "varchar(20)", nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -56,15 +57,32 @@ namespace IotSupplyStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    C_Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    C_Home = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    C_Icon = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Suppliers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    S_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    S_Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    S_Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    S_Fax = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    S_Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    S_Email = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    S_Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    S_Fax = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
                 },
@@ -180,29 +198,6 @@ namespace IotSupplyStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Categories",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    C_Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    C_Home = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    C_Nameoperty = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Categories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Categories_AspNetUsers_ApplicationUserId",
-                        column: x => x.ApplicationUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Orders",
                 columns: table => new
                 {
@@ -210,12 +205,12 @@ namespace IotSupplyStore.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     TransactionId = table.Column<int>(type: "int", nullable: false),
                     ProductId = table.Column<int>(type: "int", nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Or_Quantity = table.Column<int>(type: "int", nullable: false),
                     Or_Price = table.Column<float>(type: "real", nullable: false),
                     Or_PriceSale = table.Column<float>(type: "real", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -233,14 +228,14 @@ namespace IotSupplyStore.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CategoryId = table.Column<int>(type: "int", nullable: false),
-                    SupplierId = table.Column<int>(type: "int", nullable: false),
                     UserId = table.Column<int>(type: "int", nullable: false),
-                    P_Code = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    P_Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    P_Code = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    P_Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     P_Quantity = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
+                    SupplierId = table.Column<int>(type: "int", nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -250,7 +245,7 @@ namespace IotSupplyStore.Migrations
                         column: x => x.CategoryId,
                         principalTable: "Categories",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_Products_Suppliers_SupplierId",
                         column: x => x.SupplierId,
@@ -265,16 +260,16 @@ namespace IotSupplyStore.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    OrderId = table.Column<int>(type: "int", nullable: false),
-                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     Tr_Total = table.Column<int>(type: "int", nullable: false),
-                    Tr_Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Tr_Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Tr_Phone = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Tr_Payment = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Tr_Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Tr_Note = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Tr_Address = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: true),
+                    Tr_Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: true),
+                    Tr_Payment = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Tr_Status = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: true),
+                    OrderId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -298,13 +293,13 @@ namespace IotSupplyStore.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ProductId = table.Column<int>(type: "int", nullable: false),
                     P_Price = table.Column<float>(type: "real", nullable: false),
                     P_Warranty = table.Column<int>(type: "int", nullable: false),
-                    P_TitleSeo = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    P_KeywordSeo = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    P_TitleSeo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    P_KeywordSeo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
                     P_Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    P_Content = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    P_Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ProductId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -352,13 +347,13 @@ namespace IotSupplyStore.Migrations
                         column: x => x.OrdersId,
                         principalTable: "Orders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                     table.ForeignKey(
                         name: "FK_ProductOrder_Products_ProductsId",
                         column: x => x.ProductsId,
                         principalTable: "Products",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.NoAction);
                 });
 
             migrationBuilder.CreateIndex(
@@ -401,14 +396,10 @@ namespace IotSupplyStore.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Categories_ApplicationUserId",
-                table: "Categories",
-                column: "ApplicationUserId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_DetailsProducts_ProductId",
                 table: "DetailsProducts",
-                column: "ProductId");
+                column: "ProductId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Images_ProductId",

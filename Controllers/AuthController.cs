@@ -8,11 +8,14 @@ using System.Security.Claims;
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
 
 namespace IotSupplyStore.Controllers
 {
     [Route("api/auth")]
     [ApiController]
+    [Authorize]
     public class AuthController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
@@ -27,16 +30,55 @@ namespace IotSupplyStore.Controllers
             _userManager = userManager;
             _roleManager = roleManager;
         }
-        [HttpPost("register/customer")] //For Customer
-        public async Task<IActionResult> Register([FromBody] CustomerRegisterRequestDTO model)
+
+        [Authorize(Roles = SD.Role_Admin)]
+        [HttpPost("register/admin")]
+        public async Task<IActionResult> RegisterAdmin(AdminRegisterRequestDTO model)
         {
-            ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
+            ApplicationUser newAdmin = new()
+            {
+                UserName = model.UserName,
+                FullName = model.FullName
+            };
+            try
+            {
+                IdentityResult result;
+                try
+                {
+                    result = await _userManager.CreateAsync(newAdmin, model.Password);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Problem occurs when assign username or full name! Please re-check again!");
+                }
+                if (result.Succeeded)
+                {
+                    if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
+                    }
+                    await _userManager.AddToRoleAsync(newAdmin, SD.Role_Admin);
+                    return Ok("Admin registered");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            return BadRequest("please re-check the information");
+        }
+
+        [AllowAnonymous]
+        [HttpPost("register/customer")] //For Customer
+        public async Task<IActionResult> RegisterCustomer([FromBody] CustomerRegisterRequestDTO model)
+        {
+            ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.FullName.ToLower() == model.Name.ToLower());
             if (userFromDb != null)
             {
                 return BadRequest("This user has already exist!!!");
             }
 
-            ApplicationUser newUser = new()
+            ApplicationUser newUser = new ApplicationUser()
             {
                 UserName = model.UserName,
                 Email = model.Email,
@@ -47,31 +89,21 @@ namespace IotSupplyStore.Controllers
             };
             try
             {
-                var result = await _userManager.CreateAsync(newUser, model.Password);
+                IdentityResult result;
+                try
+                {
+                    result = await _userManager.CreateAsync(newUser, model.Password);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Problem occurs when assign username or full name! Please re-check again!");
+                }
                 if (result.Succeeded)
                 {
-                    if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                    if (!_roleManager.RoleExistsAsync(SD.Role_Customer).GetAwaiter().GetResult())
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
                     }
-                    //if (model.Role.ToLower() == SD.Role_Admin)
-                    //{
-                    //    await _userManager.AddToRoleAsync(newUser, SD.Role_Admin);
-                    //}
-                    //else if (model.Role.ToLower() == SD.Role_Employee)
-                    //{
-                    //    await _userManager.AddToRoleAsync(newUser, SD.Role_Employee);
-                    //}
-                    //else if (model.Role.ToLower() == SD.Role_Customer)
-                    //{
-                    //    await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
-                    //}
-                    //else
-                    //{
-                    //    return BadRequest();
-                    //}
                     await _userManager.AddToRoleAsync(newUser, SD.Role_Customer);
                     return Ok("Registered");
                 }
@@ -80,53 +112,54 @@ namespace IotSupplyStore.Controllers
             {
                 Console.WriteLine(ex);
             }
-            return BadRequest();
+            return BadRequest("Failed to register new user!");
         }
-        [HttpPost("register/employee")] //For Employee Request
-        public async Task<IActionResult> RegisterEmployee([FromBody] EmployeeRegisterRequestDTO model)
-        {
-            ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
-            if (userFromDb != null)
-            {
-                return BadRequest("This user has already exist!!!");
-            }
-            if (model.citizenIdentification == null)
-            {
-                return BadRequest("This employee must have Citizen Identification");
-            }
 
-            ApplicationUser newUser = new()
+        [Authorize(Roles = SD.Role_Admin)]
+        [HttpPost("register/employee")]
+        public async Task<IActionResult> RegisterEmployee(EmployeeRequest empRequest)
+        {
+            ApplicationUser newEmployee = new()
             {
-                UserName = model.UserName,
-                Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper(),
-                FullName = model.Name,
-                PhoneNumber = model.PhoneNumber,
-                Address = model.Address,
-                citizenIdentification = model.citizenIdentification,
+                UserName = empRequest.UserName,
+                Email = empRequest.Email,
+                NormalizedEmail = empRequest.Email.ToUpper(),
+                FullName = empRequest.Name,
+                PhoneNumber = empRequest.PhoneNumber,
+                Address = empRequest.Address,
+                citizenIdentification = empRequest.citizenIdentification
             };
+            string FirstPassword = "abcde12345";
             try
             {
-                var result = await _userManager.CreateAsync(newUser, model.Password);
+                IdentityResult result;
+                try
+                {
+                    result = await _userManager.CreateAsync(newEmployee, FirstPassword);
+                }
+                catch (Exception)
+                {
+                    return BadRequest("Problem occurs when assign username or full name! Please re-check again!");
+                }
                 if (result.Succeeded)
                 {
-                    if (!_roleManager.RoleExistsAsync(SD.Role_Admin).GetAwaiter().GetResult())
+                    if (!_roleManager.RoleExistsAsync(SD.Role_Employee).GetAwaiter().GetResult())
                     {
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Admin));
-                        await _roleManager.CreateAsync(new IdentityRole(SD.Role_Customer));
                         await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
                     }
-                    await _userManager.AddToRoleAsync(newUser, SD.Role_Employee);
-                    return Ok("Registered");
+                    await _userManager.AddToRoleAsync(newEmployee, SD.Role_Employee);
+                    return Ok("Employee registered");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
-            return BadRequest();
+            return BadRequest("please re-check the information");
         }
+
         [HttpPost("login")]
+        [AllowAnonymous]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
         {
             ApplicationUser userFromDb = _db.User.FirstOrDefault(u => u.UserName.ToLower() == model.UserName.ToLower());
