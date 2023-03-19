@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
@@ -102,11 +97,19 @@ namespace IotSupplyStore.Controllers
             await _context.SaveChangesAsync();
 
             // Gán giá trị của thuộc tính Id của đối tượng Order cho thuộc tính OrderId của các đối tượng ProductOrder
-            order.ProductOrders.ForEach(x => x.OrderId = orderCreate.Id);
+            //order.ProductOrders.ForEach(x => x.OrderId = orderCreate.Id);
+            foreach (var item in order.ProductOrders)
+            {
+                item.OrderId = orderCreate.Id;
+            }
             _context.ProductOrders.AddRange(order.ProductOrders);
             await _context.SaveChangesAsync();
 
-            order.ProductOrders.ForEach(x => x.Order = null);
+            //order.ProductOrders.ForEach(x => x.Order = null);
+            foreach (var item in order.ProductOrders)
+            {
+                item.Order = null;
+            }
             return order;
         }
 
