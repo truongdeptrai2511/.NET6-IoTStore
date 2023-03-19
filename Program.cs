@@ -1,5 +1,7 @@
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
+using IotSupplyStore.Service.IService;
+using IotSupplyStore.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +25,9 @@ builder.Services.AddControllers().AddNewtonsoftJson(options =>
 });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add DI
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 //services cors
 builder.Services.AddCors(p => p.AddPolicy("AllowAllHeadersPolicy", builder =>
