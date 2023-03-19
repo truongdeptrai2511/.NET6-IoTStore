@@ -13,7 +13,7 @@ namespace IotSupplyStore.Models
         public string AvatarLink { get; set; }
         public string Address { get; set; }
         [Required]
-        public string citizenIdentification { get; set; } //REQUIRED
+        public string CitizenIdentification { get; set; } //REQUIRED
 
         public DateTime RequestAt { get; set; } = DateTime.Now;
     }

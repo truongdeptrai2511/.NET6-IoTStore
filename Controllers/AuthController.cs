@@ -127,7 +127,7 @@ namespace IotSupplyStore.Controllers
                 FullName = empRequest.Name,
                 PhoneNumber = empRequest.PhoneNumber,
                 Address = empRequest.Address,
-                citizenIdentification = empRequest.citizenIdentification
+                citizenIdentification = empRequest.CitizenIdentification
             };
             string FirstPassword = "abcde12345";
             try

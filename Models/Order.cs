@@ -24,8 +24,7 @@ namespace IotSupplyStore.Models
         public ApplicationUser ApplicationUser { get; set; }
         
         public ICollection<Transactions> Transactions { get; set; }
-        //public ICollection<Product> Products { get; set; }
-        public List<ProductOrder> ProductOrders { get; set; }
+        public ICollection<ProductOrder> ProductOrders { get; set; }
     }
 
 }

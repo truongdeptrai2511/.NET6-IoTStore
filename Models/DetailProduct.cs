@@ -16,9 +16,5 @@ namespace IotSupplyStore.Models
         public string P_KeywordSeo { get; set; }
         public string P_Description { get; set; }
         public string P_Content { get; set; }
-        
-        public int ProductId { get; set; }
-        [ForeignKey("ProductId")]
-        public Product Product { get; set; }
     }
 }

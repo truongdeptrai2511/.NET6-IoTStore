@@ -73,7 +73,7 @@ namespace IotSupplyStore.Controllers
                 PhoneNumber = model.PhoneNumber,
                 AvatarLink = model.AvatarLink,
                 Address = model.Address,
-                citizenIdentification = model.citizenIdentification
+                CitizenIdentification = model.citizenIdentification
             };
             _db.EmployeeRequests.Add(newEmployeeRequest);
             _db.SaveChanges();

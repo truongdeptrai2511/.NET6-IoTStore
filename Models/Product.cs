@@ -17,7 +17,6 @@ namespace IotSupplyStore.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
 
-
         public int SupplierId { get; set; }
         [ForeignKey("SupplierId")]
         public Suppliers Suppliers { get; set; }
@@ -25,10 +24,10 @@ namespace IotSupplyStore.Models
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
-      
-        public ICollection<ProductOrder> ProductOrders { get; set; }
 
         public DetailProduct DetailProduct { get; set; }
-        public ICollection<DetailProduct> DetailProductId { get; set; }
+
+        public ICollection<ProductOrder> ProductOrders { get; set; }
     }
 }
+
