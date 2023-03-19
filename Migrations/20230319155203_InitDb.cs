@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace IotSupplyStore.Migrations
 {
     /// <inheritdoc />
-    public partial class seedDb : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -38,13 +38,13 @@ namespace IotSupplyStore.Migrations
                     UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    Email = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
-                    NormalizedEmail = table.Column<string>(type: "varchar(256)", maxLength: 256, nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    NormalizedEmail = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     EmailConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SecurityStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    PhoneNumber = table.Column<string>(type: "varchar(20)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PhoneNumberConfirmed = table.Column<bool>(type: "bit", nullable: false),
                     TwoFactorEnabled = table.Column<bool>(type: "bit", nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -71,6 +71,44 @@ namespace IotSupplyStore.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Categories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DetailsProducts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    P_Price = table.Column<float>(type: "real", nullable: false),
+                    P_Warranty = table.Column<int>(type: "int", nullable: false),
+                    P_TitleSeo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    P_KeywordSeo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    P_Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    P_Content = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DetailsProducts", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EmployeeRequests",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PhoneNumber = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AvatarLink = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Address = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CitizenIdentification = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RequestAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EmployeeRequests", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -235,7 +273,8 @@ namespace IotSupplyStore.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2(0)", nullable: false),
                     SupplierId = table.Column<int>(type: "int", nullable: false),
-                    CategoryId = table.Column<int>(type: "int", nullable: false)
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    DetailProductId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -246,6 +285,12 @@ namespace IotSupplyStore.Migrations
                         principalTable: "Categories",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.NoAction);
+                    table.ForeignKey(
+                        name: "FK_Products_DetailsProducts_DetailProductId",
+                        column: x => x.DetailProductId,
+                        principalTable: "DetailsProducts",
+                        principalColumn: "Id",
+                        onDelete:ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Products_Suppliers_SupplierId",
                         column: x => x.SupplierId,
@@ -288,31 +333,6 @@ namespace IotSupplyStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "DetailsProducts",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    P_Price = table.Column<float>(type: "real", nullable: false),
-                    P_Warranty = table.Column<int>(type: "int", nullable: false),
-                    P_TitleSeo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    P_KeywordSeo = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
-                    P_Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    P_Content = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ProductId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DetailsProducts", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_DetailsProducts_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Images",
                 columns: table => new
                 {
@@ -333,27 +353,29 @@ namespace IotSupplyStore.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProductOrder",
+                name: "ProductOrders",
                 columns: table => new
                 {
-                    OrdersId = table.Column<int>(type: "int", nullable: false),
-                    ProductsId = table.Column<int>(type: "int", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ProductId = table.Column<int>(type: "int", nullable: false),
+                    OrderId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProductOrder", x => new { x.OrdersId, x.ProductsId });
+                    table.PrimaryKey("PK_ProductOrders", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProductOrder_Orders_OrdersId",
-                        column: x => x.OrdersId,
+                        name: "FK_ProductOrders_Orders_OrderId",
+                        column: x => x.OrderId,
                         principalTable: "Orders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProductOrder_Products_ProductsId",
-                        column: x => x.ProductsId,
+                        name: "FK_ProductOrders_Products_ProductId",
+                        column: x => x.ProductId,
                         principalTable: "Products",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.NoAction);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -396,12 +418,6 @@ namespace IotSupplyStore.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_DetailsProducts_ProductId",
-                table: "DetailsProducts",
-                column: "ProductId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Images_ProductId",
                 table: "Images",
                 column: "ProductId");
@@ -412,14 +428,24 @@ namespace IotSupplyStore.Migrations
                 column: "ApplicationUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProductOrder_ProductsId",
-                table: "ProductOrder",
-                column: "ProductsId");
+                name: "IX_ProductOrders_OrderId",
+                table: "ProductOrders",
+                column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductOrders_ProductId",
+                table: "ProductOrders",
+                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_CategoryId",
                 table: "Products",
                 column: "CategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Products_DetailProductId",
+                table: "Products",
+                column: "DetailProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_SupplierId",
@@ -456,13 +482,13 @@ namespace IotSupplyStore.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "DetailsProducts");
+                name: "EmployeeRequests");
 
             migrationBuilder.DropTable(
                 name: "Images");
 
             migrationBuilder.DropTable(
-                name: "ProductOrder");
+                name: "ProductOrders");
 
             migrationBuilder.DropTable(
                 name: "Transactions");
@@ -478,6 +504,9 @@ namespace IotSupplyStore.Migrations
 
             migrationBuilder.DropTable(
                 name: "Categories");
+
+            migrationBuilder.DropTable(
+                name: "DetailsProducts");
 
             migrationBuilder.DropTable(
                 name: "Suppliers");

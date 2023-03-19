@@ -137,13 +137,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasKey("Id");
 
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.ToTable("Categories", (string)null);
-
                     b.ToTable("Categories");
-
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.DetailProduct", b =>
@@ -174,15 +168,9 @@ namespace IotSupplyStore.Migrations
                     b.Property<int>("P_Warranty")
                         .HasColumnType("int");
 
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("ProductId")
-                        .IsUnique();
-
-                    b.ToTable("DetailsProducts", (string)null);
+                    b.ToTable("DetailsProducts");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.EmployeeRequest", b =>
@@ -199,6 +187,10 @@ namespace IotSupplyStore.Migrations
                     b.Property<string>("AvatarLink")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("CitizenIdentification")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
@@ -211,8 +203,7 @@ namespace IotSupplyStore.Migrations
                     b.Property<DateTime>("RequestAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("citizenIdentification")
-                        .IsRequired()
+                    b.Property<string>("UserName")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
@@ -238,7 +229,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Images", (string)null);
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
@@ -277,7 +268,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ApplicationUserId");
 
-                    b.ToTable("Orders", (string)null);
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Product", b =>
@@ -293,6 +284,9 @@ namespace IotSupplyStore.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<int?>("DetailProductId")
+                        .HasColumnType("int");
 
                     b.Property<string>("P_Code")
                         .HasMaxLength(100)
@@ -318,9 +312,11 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("CategoryId");
 
+                    b.HasIndex("DetailProductId");
+
                     b.HasIndex("SupplierId");
 
-                    b.ToTable("Products", (string)null);
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.ProductOrder", b =>
@@ -343,7 +339,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("ProductOrders", (string)null);
+                    b.ToTable("ProductOrders");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Suppliers", b =>
@@ -378,7 +374,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Suppliers", (string)null);
+                    b.ToTable("Suppliers");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Transactions", b =>
@@ -430,7 +426,7 @@ namespace IotSupplyStore.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.ToTable("Transactions", (string)null);
+                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -566,46 +562,6 @@ namespace IotSupplyStore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("IotSupplyStore.Models.Category", b =>
-                {
-                    b.HasOne("IotSupplyStore.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("Category")
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.Navigation("ApplicationUser");
-
-            modelBuilder.Entity("OrderProduct", b =>
-                {
-                    b.Property<int>("OrdersId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductsId")
-                        .HasColumnType("int");
-
-                    b.HasKey("OrdersId", "ProductsId");
-
-                    b.HasIndex("ProductsId");
-
-                    b.ToTable("ProductOrder", (string)null);
-
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.DetailProduct", b =>
-                {
-                    b.HasOne("IotSupplyStore.Models.Product", "Product")
-
-                        .WithMany("DetailProductId")
-                        .HasForeignKey("ProductId")
-
-                        .WithOne("DetailProduct")
-                        .HasForeignKey("IotSupplyStore.Models.DetailProduct", "ProductId")
-
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("IotSupplyStore.Models.Images", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.Product", "Product")
@@ -634,6 +590,10 @@ namespace IotSupplyStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("IotSupplyStore.Models.DetailProduct", "DetailProduct")
+                        .WithMany()
+                        .HasForeignKey("DetailProductId");
+
                     b.HasOne("IotSupplyStore.Models.Suppliers", "Suppliers")
                         .WithMany("Products")
                         .HasForeignKey("SupplierId")
@@ -642,22 +602,28 @@ namespace IotSupplyStore.Migrations
 
                     b.Navigation("Category");
 
+                    b.Navigation("DetailProduct");
+
                     b.Navigation("Suppliers");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.ProductOrder", b =>
                 {
-                    b.HasOne("IotSupplyStore.Models.Order", null)
+                    b.HasOne("IotSupplyStore.Models.Order", "Order")
                         .WithMany("ProductOrders")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IotSupplyStore.Models.Product", null)
+                    b.HasOne("IotSupplyStore.Models.Product", "Product")
                         .WithMany("ProductOrders")
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Order");
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Transactions", b =>
@@ -744,8 +710,6 @@ namespace IotSupplyStore.Migrations
 
             modelBuilder.Entity("IotSupplyStore.Models.Product", b =>
                 {
-                    b.Navigation("DetailProductId");
-
                     b.Navigation("ProductOrders");
                 });
 
