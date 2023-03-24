@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
+using IotSupplyStore.Models.UpsertModel;
 
 namespace IotSupplyStore.Controllers
 {
@@ -76,41 +77,20 @@ namespace IotSupplyStore.Controllers
         // POST: api/Orders
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Order>> PostOrder(Order order)
+        public async Task<ActionResult<Order>> PostOrder(OrderUpsert order)
         {
             var userid = User.Claims.Where(x => x.Type == "id").FirstOrDefault()?.Value;
             var orderCreate = new Order
             {
-                Transactions = order.Transactions,
                 Or_Price = order.Or_Price,
                 Or_PriceSale = order.Or_PriceSale,
                 Or_Quantity = order.Or_Quantity,
                 ApplicationUserId = userid,
-                /*Id = order.Id,
-                ProductOrders = order.ProductOrders.Select(x => new ProductOrder
-                {
-                    ProductId = x.ProductId,
-                    OrderId = x=orderCreate.Id
-                }).ToList()*/
             };
             _context.Orders.Add(orderCreate);
             await _context.SaveChangesAsync();
 
-            // Gán giá trị của thuộc tính Id của đối tượng Order cho thuộc tính OrderId của các đối tượng ProductOrder
-            //order.ProductOrders.ForEach(x => x.OrderId = orderCreate.Id);
-            foreach (var item in order.ProductOrders)
-            {
-                item.OrderId = orderCreate.Id;
-            }
-            _context.ProductOrders.AddRange(order.ProductOrders);
-            await _context.SaveChangesAsync();
-
-            //order.ProductOrders.ForEach(x => x.Order = null);
-            foreach (var item in order.ProductOrders)
-            {
-                item.Order = null;
-            }
-            return order;
+            return Ok("added");
         }
 
         // DELETE: api/Orders/5
