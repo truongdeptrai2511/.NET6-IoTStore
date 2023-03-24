@@ -50,7 +50,6 @@ namespace IotSupplyStore.Controllers
                 Address = obj.Address,
                 CreatedAt = obj.CreatedAt,
                 UpdatedAt = obj.UpdatedAt,
-                TransactionList = obj.TransactionList,
                 Orders = obj.Orders,
             };
             return Ok(result);

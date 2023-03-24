@@ -11,7 +11,6 @@
         public string Address { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
-        public ICollection<Transactions> TransactionList { get; set; }
         public ICollection<Order> Orders { get; set; }
     }
 }

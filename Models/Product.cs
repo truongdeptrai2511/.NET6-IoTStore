@@ -8,6 +8,7 @@ namespace IotSupplyStore.Models
         public int Id { get; set; }
 
         public int UserId { get; set; }
+        public string ImgName { get; set; }
         [StringLength(100)]
         public string P_Code { get; set; }
         [StringLength(50)]
@@ -27,7 +28,6 @@ namespace IotSupplyStore.Models
 
         public DetailProduct DetailProduct { get; set; }
 
-        public ICollection<ProductOrder> ProductOrders { get; set; }
     }
 }
 

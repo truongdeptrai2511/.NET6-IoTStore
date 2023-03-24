@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IotSupplyStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230319155203_InitDb")]
-    partial class InitDb
+    [Migration("20230324032838_DbInit")]
+    partial class DbInit
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -214,27 +214,6 @@ namespace IotSupplyStore.Migrations
                     b.ToTable("EmployeeRequests");
                 });
 
-            modelBuilder.Entity("IotSupplyStore.Models.Images", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ImName")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProductId");
-
-                    b.ToTable("Images");
-                });
-
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
                 {
                     b.Property<int>("Id")
@@ -256,12 +235,6 @@ namespace IotSupplyStore.Migrations
                         .HasColumnType("real");
 
                     b.Property<int>("Or_Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("ProductId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TransactionId")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdatedAt")
@@ -290,6 +263,9 @@ namespace IotSupplyStore.Migrations
 
                     b.Property<int?>("DetailProductId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ImgName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("P_Code")
                         .HasMaxLength(100)
@@ -330,7 +306,13 @@ namespace IotSupplyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
                     b.Property<int>("OrderId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Price")
                         .HasColumnType("int");
 
                     b.Property<int>("ProductId")
@@ -343,6 +325,32 @@ namespace IotSupplyStore.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("ProductOrders");
+                });
+
+            modelBuilder.Entity("IotSupplyStore.Models.ShoppingCart", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ApplicationUserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ShoppingCarts");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Suppliers", b =>
@@ -378,58 +386,6 @@ namespace IotSupplyStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Suppliers");
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.Transactions", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Tr_Address")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Tr_Note")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Tr_Payment")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("Tr_Phone")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Tr_Status")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("Tr_Total")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.HasIndex("OrderId");
-
-                    b.ToTable("Transactions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -565,17 +521,6 @@ namespace IotSupplyStore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("IotSupplyStore.Models.Images", b =>
-                {
-                    b.HasOne("IotSupplyStore.Models.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.ApplicationUser", "ApplicationUser")
@@ -613,13 +558,13 @@ namespace IotSupplyStore.Migrations
             modelBuilder.Entity("IotSupplyStore.Models.ProductOrder", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.Order", "Order")
-                        .WithMany("ProductOrders")
+                        .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("IotSupplyStore.Models.Product", "Product")
-                        .WithMany("ProductOrders")
+                        .WithMany()
                         .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -629,21 +574,21 @@ namespace IotSupplyStore.Migrations
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("IotSupplyStore.Models.Transactions", b =>
+            modelBuilder.Entity("IotSupplyStore.Models.ShoppingCart", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("TransactionList")
+                        .WithMany("ShoppingCarts")
                         .HasForeignKey("ApplicationUserId");
 
-                    b.HasOne("IotSupplyStore.Models.Order", "Order")
-                        .WithMany("Transactions")
-                        .HasForeignKey("OrderId")
+                    b.HasOne("IotSupplyStore.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("ApplicationUser");
 
-                    b.Navigation("Order");
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -701,19 +646,7 @@ namespace IotSupplyStore.Migrations
                 {
                     b.Navigation("Orders");
 
-                    b.Navigation("TransactionList");
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
-                {
-                    b.Navigation("ProductOrders");
-
-                    b.Navigation("Transactions");
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.Product", b =>
-                {
-                    b.Navigation("ProductOrders");
+                    b.Navigation("ShoppingCarts");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Suppliers", b =>
