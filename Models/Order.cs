@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using IotSupplyStore.DataAccess;
-using Microsoft.EntityFrameworkCore;
 
 namespace IotSupplyStore.Models
 {
@@ -10,19 +8,10 @@ namespace IotSupplyStore.Models
         [Key]
         public int Id { get; set; }
 
-        public float PriceSale { get; set; }
+        public float PriceSale { get; set; } = 0;
         public float OrderTotal { get; set; }
         public bool OrderStatus { get; set; } = false;
         public bool PaymentStatus { get; set; } = false;
-        
-        
-
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        public DateTime ShippingDate { get; set; } = DateTime.Now.AddDays(2);
-        public DateTime OrderDate { get; set; } = DateTime.Now;
-        public DateTime PaymentDate { get; set; }
-        public DateTime PaymentDueDate { get; set; }
 
 
         public string CustomerName { get; set; }
@@ -33,10 +22,17 @@ namespace IotSupplyStore.Models
         public string PostalCode { get; set; }
 
 
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime ShippingDate { get; set; } = DateTime.Now.AddDays(2);
+        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public DateTime PaymentDate { get; set; }
+        public DateTime PaymentDueDate { get; set; }
+
+
         public string ApplicationUserId { get; set; }
         [ForeignKey("ApplicationUserId")]
         public ApplicationUser ApplicationUser { get; set; }
     }
-
 }
 

@@ -16,8 +16,5 @@ namespace IotSupplyStore.Models
         
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        
-        public ICollection<Order> Orders { get; set; }
-        public ICollection<ShoppingCart> ShoppingCarts { get; set;}
     }
 }

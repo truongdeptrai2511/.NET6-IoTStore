@@ -7,13 +7,15 @@ namespace IotSupplyStore.Models
         [Key]
         public int Id { get; set; }
 
-        public int UserId { get; set; }
+        public string ProductName { get; set; }
         public string ImgName { get; set; }
         [StringLength(100)]
-        public string P_Code { get; set; }
+        public string Code { get; set; }
         [StringLength(50)]
-        public string P_Status { get; set; }
-        public int P_Quantity { get; set; }
+        public string Status { get; set; }
+        public int Quantity { get; set; }
+        public float Price { get; set; }
+        public string Description { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
@@ -25,9 +27,6 @@ namespace IotSupplyStore.Models
         public int CategoryId { get; set; }
         [ForeignKey("CategoryId")]
         public Category Category { get; set; }
-
-        public DetailProduct DetailProduct { get; set; }
-
     }
 }
 

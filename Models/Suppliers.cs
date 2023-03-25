@@ -9,17 +9,15 @@ namespace IotSupplyStore.Models
         public int Id { get; set; }
         
         [StringLength(50)]
-        public string S_Name { get; set; }
+        public string SupplierName { get; set; }
         [StringLength(50)]
-        public string S_Email { get; set; }
+        public string SupplierEmail { get; set; }
         [StringLength(20)]
-        public string S_Phone { get; set; }
+        public string SupplierPhoneNumber { get; set; }
         [StringLength(50)]
-        public string S_Fax { get; set; }
+        public string SupplierFax { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
-        
-        public ICollection<Product> Products { get; set; }
     }
 }

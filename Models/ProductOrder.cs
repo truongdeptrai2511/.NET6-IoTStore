@@ -9,7 +9,7 @@ namespace IotSupplyStore.Models
         public int Id { get; set; }
 
         public int Count { get; set; }
-        public int Price { get; set; }
+        public float Price { get; set; }
 
         public int OrderId { get; set; }
         [ForeignKey("OrderId")]
