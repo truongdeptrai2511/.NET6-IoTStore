@@ -117,15 +117,7 @@ namespace IotSupplyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("C_Home")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("C_Icon")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("C_Name")
+                    b.Property<string>("CategoryName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -138,39 +130,6 @@ namespace IotSupplyStore.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.DetailProduct", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("P_Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("P_Description")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("P_KeywordSeo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<float>("P_Price")
-                        .HasColumnType("real");
-
-                    b.Property<string>("P_TitleSeo")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("P_Warranty")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("DetailsProducts");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.EmployeeRequest", b =>
@@ -288,23 +247,29 @@ namespace IotSupplyStore.Migrations
                     b.Property<int>("CategoryId")
                         .HasColumnType("int");
 
+                    b.Property<string>("Code")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("DetailProductId")
-                        .HasColumnType("int");
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ImgName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("P_Code")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
 
-                    b.Property<int>("P_Quantity")
+                    b.Property<string>("ProductName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<string>("P_Status")
+                    b.Property<string>("Status")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -314,14 +279,9 @@ namespace IotSupplyStore.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("DetailProductId");
 
                     b.HasIndex("SupplierId");
 
@@ -394,19 +354,19 @@ namespace IotSupplyStore.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("S_Email")
+                    b.Property<string>("SupplierEmail")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("S_Fax")
+                    b.Property<string>("SupplierFax")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("S_Name")
+                    b.Property<string>("SupplierName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("S_Phone")
+                    b.Property<string>("SupplierPhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -568,10 +528,6 @@ namespace IotSupplyStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IotSupplyStore.Models.DetailProduct", "DetailProduct")
-                        .WithMany()
-                        .HasForeignKey("DetailProductId");
-
                     b.HasOne("IotSupplyStore.Models.Suppliers", "Suppliers")
                         .WithMany("Products")
                         .HasForeignKey("SupplierId")
@@ -579,8 +535,6 @@ namespace IotSupplyStore.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
-
-                    b.Navigation("DetailProduct");
 
                     b.Navigation("Suppliers");
                 });

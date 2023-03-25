@@ -95,7 +95,7 @@ namespace IotSupplyStore.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("citizenIdentification")
+                    b.Property<string>("CitizenIdentification")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -400,19 +400,19 @@ namespace IotSupplyStore.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("S_Email")
+                    b.Property<string>("SupplierEmail")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("S_Fax")
+                    b.Property<string>("SupplierFax")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("S_Name")
+                    b.Property<string>("SupplierName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<string>("S_Phone")
+                    b.Property<string>("SupplierPhoneNumber")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 

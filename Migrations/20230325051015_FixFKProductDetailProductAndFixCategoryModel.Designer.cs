@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace IotSupplyStore.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230324032838_DbInit")]
-    partial class DbInit
+    [Migration("20230325051015_FixFKProductDetailProductAndFixCategoryModel")]
+    partial class FixFKProductDetailProductAndFixCategoryModel
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -95,7 +95,7 @@ namespace IotSupplyStore.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("CitizenIdentification")
+                    b.Property<string>("citizenIdentification")
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
@@ -120,15 +120,7 @@ namespace IotSupplyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("C_Home")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("C_Icon")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("C_Name")
+                    b.Property<string>("CategoryName")
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -171,7 +163,13 @@ namespace IotSupplyStore.Migrations
                     b.Property<int>("P_Warranty")
                         .HasColumnType("int");
 
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("ProductId")
+                        .IsUnique();
 
                     b.ToTable("DetailsProducts");
                 });
@@ -222,20 +220,53 @@ namespace IotSupplyStore.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ApplicationUserId")
                         .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("City")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<float>("Or_Price")
+                    b.Property<string>("CustomerName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("OrderStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<float>("OrderTotal")
                         .HasColumnType("real");
 
-                    b.Property<float>("Or_PriceSale")
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("PaymentDueDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("PaymentStatus")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PostalCode")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<float>("PriceSale")
                         .HasColumnType("real");
 
-                    b.Property<int>("Or_Quantity")
-                        .HasColumnType("int");
+                    b.Property<string>("Region")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ShippingDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -260,9 +291,6 @@ namespace IotSupplyStore.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<int?>("DetailProductId")
-                        .HasColumnType("int");
 
                     b.Property<string>("ImgName")
                         .HasColumnType("nvarchar(max)");
@@ -290,8 +318,6 @@ namespace IotSupplyStore.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("DetailProductId");
 
                     b.HasIndex("SupplierId");
 
@@ -521,6 +547,17 @@ namespace IotSupplyStore.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("IotSupplyStore.Models.DetailProduct", b =>
+                {
+                    b.HasOne("IotSupplyStore.Models.Product", "Product")
+                        .WithOne("DetailProduct")
+                        .HasForeignKey("IotSupplyStore.Models.DetailProduct", "ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
+                });
+
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.ApplicationUser", "ApplicationUser")
@@ -538,10 +575,6 @@ namespace IotSupplyStore.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("IotSupplyStore.Models.DetailProduct", "DetailProduct")
-                        .WithMany()
-                        .HasForeignKey("DetailProductId");
-
                     b.HasOne("IotSupplyStore.Models.Suppliers", "Suppliers")
                         .WithMany("Products")
                         .HasForeignKey("SupplierId")
@@ -549,8 +582,6 @@ namespace IotSupplyStore.Migrations
                         .IsRequired();
 
                     b.Navigation("Category");
-
-                    b.Navigation("DetailProduct");
 
                     b.Navigation("Suppliers");
                 });
@@ -647,6 +678,11 @@ namespace IotSupplyStore.Migrations
                     b.Navigation("Orders");
 
                     b.Navigation("ShoppingCarts");
+                });
+
+            modelBuilder.Entity("IotSupplyStore.Models.Product", b =>
+                {
+                    b.Navigation("DetailProduct");
                 });
 
             modelBuilder.Entity("IotSupplyStore.Models.Suppliers", b =>
