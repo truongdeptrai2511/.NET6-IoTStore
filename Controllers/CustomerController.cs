@@ -7,11 +7,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-
-// TODO
-
-
-
 namespace IotSupplyStore.Controllers
 {
     [Route("api/customer")]
@@ -24,6 +19,7 @@ namespace IotSupplyStore.Controllers
         {
             _db = db;
         }
+
         [HttpGet]
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> GetAllCustomers()
@@ -31,6 +27,7 @@ namespace IotSupplyStore.Controllers
             var model = await _db.User.ToListAsync();
             return Ok(model);
         }
+
         [HttpGet("{id}")]
         [Authorize(Roles = SD.Role_Customer + "," + SD.Role_Admin)]
         public async Task<IActionResult> GetCustomer(string id)
@@ -50,7 +47,6 @@ namespace IotSupplyStore.Controllers
                 Address = obj.Address,
                 CreatedAt = obj.CreatedAt,
                 UpdatedAt = obj.UpdatedAt,
-                Orders = obj.Orders,
             };
             return Ok(result);
         }

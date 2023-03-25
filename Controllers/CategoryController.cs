@@ -10,56 +10,85 @@ using IotSupplyStore.Models;
 using IotSupplyStore.Models.UpsertModel;
 using Microsoft.AspNetCore.Authorization;
 using IotSupplyStore.Utility;
+using Azure;
+using IotSupplyStore.Models.ViewModel;
+using System.Net;
+using IotSupplyStore.Models.DtoModel;
 
 namespace IotSupplyStore.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
     [ApiController]
     public class CategoryController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private ApiResponse _response;
 
         public CategoryController(ApplicationDbContext db)
         {
             _db = db;
+            _response = new ApiResponse();
         }
 
         // GET: api/Category
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Category>>> GetCategories()
+        public async Task<IActionResult> GetCategories()
         {
-            return await _db.Categories.ToListAsync();
+            var categories = await _db.Categories.ToListAsync();
+
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.Result = categories;
+            _response.Message = "success";
+            _response.ErrorMessages = null;
+
+            return new JsonResult(_response);
         }
 
         // GET: api/Category/5
         [HttpGet("{id}")]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
-        public async Task<ActionResult<Category>> GetCategory(int id)
+        public async Task<IActionResult> GetCategory(int id)
         {
             var category = await _db.Categories.FindAsync(id);
 
             if (category == null)
             {
-                return NotFound();
+                _response.StatusCode = HttpStatusCode.NotFound;
+                _response.Result = null;
+                _response.Message = "Not Found";
+                _response.ErrorMessages.Add($"Not Found this updateCategory with id {id}");
+
+                return new JsonResult(_response);
             }
 
-            return category;
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.Result = category;
+            _response.Message = "Category's got successfully";
+            _response.ErrorMessages = null;
+
+            return new JsonResult(_response);
         }
 
         // PUT: api/Category/5
         [HttpPut("{id}")]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
-        public async Task<IActionResult> PutCategory(int id, Category category)
+        public async Task<IActionResult> PutCategory(int id, CategoryUpsert updateCategory)
         {
-            if (id != category.Id)
+            var categoryFromDb = _db.Categories.Find(id);
+            if (categoryFromDb == null)
             {
-                return BadRequest();
+                _response.StatusCode = HttpStatusCode.NotFound;
+                _response.Result = null;
+                _response.Message = "Fail to update";
+                _response.ErrorMessages.Add($"Category with {id} is not found");
+
+                return new JsonResult(_response);
             }
 
-            category.UpdatedAt = DateTime.Now;
-            _db.Entry(category).State = EntityState.Modified;
+            categoryFromDb.UpdatedAt = DateTime.Now;
+            categoryFromDb.CategoryName = updateCategory.CategoryName;
 
             try
             {
@@ -67,9 +96,14 @@ namespace IotSupplyStore.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CategoryExists(category.C_Name))
+                if (!CategoryExists(updateCategory.CategoryName))
                 {
-                    return NotFound();
+                    _response.StatusCode = HttpStatusCode.NotFound;
+                    _response.Result = null;
+                    _response.Message = "Fail to update";
+                    _response.ErrorMessages.Add($"Category with {id} is not found");
+
+                    return new JsonResult(_response);
                 }
                 else
                 {
@@ -77,28 +111,42 @@ namespace IotSupplyStore.Controllers
                 }
             }
 
-            return Ok("Updated");
+            _response.StatusCode = HttpStatusCode.NoContent;
+            _response.Result = categoryFromDb;
+            _response.Message = "Category's update successfully";
+            _response.ErrorMessages = null;
+
+            return new JsonResult(_response);
         }
 
         // POST: api/Category
         [HttpPost]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
-        public async Task<ActionResult<Category>> PostCategory(CategoryUpsert category)
+        public async Task<IActionResult> AddCategory(CategoryUpsert category)
         {
-            if (!CategoryExists(category.C_Name))
+            if (CategoryExists(category.CategoryName))
             {
-                return BadRequest("This category has already exist");
+                _response.StatusCode = HttpStatusCode.BadRequest;
+                _response.Result = null;
+                _response.Message = "Cannot add this category";
+                _response.ErrorMessages.Add("This category has already exist");
+
+                return new JsonResult(_response);
             }
             Category newCategory = new Category()
             {
-                C_Name = category.C_Name,
-                C_Home = category.C_Home,
-                C_Icon = category.C_Icon
+                CategoryName = category.CategoryName
             };
 
             _db.Categories.Add(newCategory);
             await _db.SaveChangesAsync();
-            return Ok("Category created");
+
+            _response.StatusCode = HttpStatusCode.NoContent;
+            _response.Result = newCategory;
+            _response.Message = "Category's added successfully";
+            _response.ErrorMessages = null;
+
+            return new JsonResult(_response);
         }
 
         // DELETE: api/Category/5
@@ -109,18 +157,28 @@ namespace IotSupplyStore.Controllers
             var category = await _db.Categories.FindAsync(id);
             if (category == null)
             {
-                return NotFound();
+                _response.StatusCode = HttpStatusCode.NotFound;
+                _response.Message = "Not Found";
+                _response.Result = null;
+                _response.ErrorMessages.Add("Cannot find this category in repository");
+
+                return new JsonResult(_response);
             }
 
             _db.Categories.Remove(category);
             await _db.SaveChangesAsync();
 
-            return NoContent();
+            _response.StatusCode = HttpStatusCode.NoContent;
+            _response.Message = "Category's deleted";
+            _response.Result = null;
+            _response.ErrorMessages = null;
+
+            return new JsonResult(_response);
         }
 
         private bool CategoryExists(string name)
         {
-            return _db.Categories.Any(e => e.C_Name == name);
+            return _db.Categories.Any(e => e.CategoryName == name);
         }
     }
 }
