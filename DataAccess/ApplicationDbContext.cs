@@ -9,7 +9,6 @@ namespace IotSupplyStore.DataAccess
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         public DbSet<Product> Products { get; set; }
         public DbSet<Category> Categories { get; set; }
-        public DbSet<DetailProduct> DetailsProducts { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Suppliers> Suppliers { get; set; }
         public DbSet<ApplicationUser> User { get; set; }
