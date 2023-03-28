@@ -11,6 +11,6 @@ namespace IotSupplyStore.Models.DtoModel
         public string PhoneNumber { get; set; }
         public string AvatarLink { get; set; }
         public string Address { get; set; }
-        public string citizenIdentification { get; set; } //REQUIRED
+        public string CitizenIdentification { get; set; } //REQUIRED
     }
 }
