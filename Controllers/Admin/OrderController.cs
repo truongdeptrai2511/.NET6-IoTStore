@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Admin
 {
     [ApiController]
     [Route("api/order")]
@@ -21,6 +21,7 @@ namespace IotSupplyStore.Controllers
             _response = new ApiResponse();
         }
 
+        [ResponseCache(Duration = 60)]
         [HttpGet("get-all-order")]
         public async Task<IActionResult> GetAllOrders()
         {
@@ -59,6 +60,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet("id")]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetDetailOrdersById(string orderId)
         {
             var order = await _db.Orders.FirstOrDefaultAsync(u => u.Id == orderId);
@@ -89,6 +91,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [Authorize]
+        [ResponseCache(Duration = 60)]
         [HttpGet("get-order-by-user")]
         public async Task<IActionResult> GetOrdersByUser()
         {

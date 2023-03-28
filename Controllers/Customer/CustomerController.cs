@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Customer
 {
     [Route("api/customer")]
     [Authorize]
@@ -21,6 +21,7 @@ namespace IotSupplyStore.Controllers
 
         [HttpGet]
         [Authorize(Roles = SD.Role_Admin)]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetAllCustomers()
         {
             var model = await _db.User.ToListAsync();
@@ -29,6 +30,7 @@ namespace IotSupplyStore.Controllers
 
         [HttpGet("{id}")]
         [Authorize(Roles = SD.Role_Admin)]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetCustomer(string id)
         {
             var obj = await _db.User.FirstOrDefaultAsync(x => x.Id == id);
@@ -49,8 +51,8 @@ namespace IotSupplyStore.Controllers
             return Ok(result);
         }
 
-        [Authorize(Roles = SD.Role_Customer + "," + SD.Role_Admin)]
         [HttpPut("{id}")]
+        [Authorize(Roles = SD.Role_Customer + "," + SD.Role_Admin)]
         public async Task<IActionResult> UpdateCustomer(string id, UserUpsert customerUpsert)
         {
             var ExistCustomer = await _db.User.FirstOrDefaultAsync(u => u.Id == id);

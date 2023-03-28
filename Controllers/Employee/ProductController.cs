@@ -7,7 +7,7 @@ using IotSupplyStore.Models.DtoModel;
 using System.Net;
 using IotSupplyStore.Models.UpsertModel;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -24,6 +24,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult> GetAllProducts() //Get all newProduct database 
         {
             var ProductList = await _db.Products.ToListAsync();
@@ -37,6 +38,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet("{id}")]
+        [ResponseCache(Duration = 60)]
         public async Task<ActionResult<Product>> GetProduct(int id)// Get newProduct by Id
         {
             var product = await _db.Products.FirstOrDefaultAsync(x => x.Id == id);
@@ -108,7 +110,7 @@ namespace IotSupplyStore.Controllers
 
         [HttpPut("{id}")]
         // Update newProduct
-        public async Task<IActionResult> UpdateProduct(int id, ProductUpsert updateProduct)    
+        public async Task<IActionResult> UpdateProduct(int id, ProductUpsert updateProduct)
         {
             var existingProduct = await _db.Products.FindAsync(id);
             if (existingProduct == null)

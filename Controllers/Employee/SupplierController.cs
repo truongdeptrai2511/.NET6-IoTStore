@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Employee
 {
     [ApiController]
     [Route("api/supplier")]

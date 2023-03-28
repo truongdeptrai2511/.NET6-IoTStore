@@ -12,7 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Security.Claims;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Admin
 {
     [Route("api/auth")]
     [ApiController]

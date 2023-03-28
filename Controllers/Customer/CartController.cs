@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Customer
 {
     [ApiController]
     [Authorize]
@@ -24,6 +24,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetOrder()
         {
             // Get User ID from Claims

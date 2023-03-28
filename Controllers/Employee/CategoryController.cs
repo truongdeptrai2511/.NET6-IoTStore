@@ -1,21 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
 using IotSupplyStore.Models.UpsertModel;
 using Microsoft.AspNetCore.Authorization;
 using IotSupplyStore.Utility;
-using Azure;
-using IotSupplyStore.Models.ViewModel;
 using System.Net;
 using IotSupplyStore.Models.DtoModel;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
     [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
@@ -32,8 +25,9 @@ namespace IotSupplyStore.Controllers
         }
 
         // GET: api/Category
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         [HttpGet]
+        [ResponseCache(Duration = 60)]
+        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> GetCategories()
         {
             var categories = await _db.Categories.ToListAsync();

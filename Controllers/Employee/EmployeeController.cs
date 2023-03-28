@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
     [Authorize]
@@ -26,6 +26,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet]
+        [ResponseCache(Duration = 60)]
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<ActionResult<IEnumerable<ApplicationUser>>> GetEmployee()
         {

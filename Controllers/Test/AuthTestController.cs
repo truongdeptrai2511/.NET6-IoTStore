@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 
-namespace IotSupplyStore.Controllers
+namespace IotSupplyStore.Controllers.Test
 {
     [Route("api/[controller]")]
     [ApiController]
