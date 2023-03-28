@@ -22,64 +22,53 @@ namespace IotSupplyStore.Controllers
             _db = db;
             _userManager = userManager;
         }
-        private async Task<UserVM> getUserVM(string role)
-        {
-            var name = User.Claims.First().Value.ToString();
-            var model = await _db.User.FirstOrDefaultAsync(u => u.FullName == name);
-            UserVM userVM = new UserVM()
-            {
-                Id = model.Id,
-                FullName = name,
-                Email = model.Email,
-                Phone= model.PhoneNumber,
-                Role = role
-            };
-            return userVM;
-        }
-
         [AllowAnonymous]
         [HttpGet("me")]
         public async Task<IActionResult> TestRole()
         {
-            var isAdmin = User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == SD.Role_Admin);
-            if (isAdmin)
+            string UserId;
+            try
             {
-                var result = await getUserVM(SD.Role_Admin);
-                return Ok(result);
+                UserId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
             }
-            var isEmployee = User.HasClaim(c => c.Type == ClaimTypes.Role && c.Value == SD.Role_Employee);
-            if (isEmployee)
+            catch
             {
-                var result = await getUserVM(SD.Role_Employee);
-                return Ok(result);
+                return BadRequest("This user hasn't authenticated");
             }
-            else
+
+            var ApplicationUser = await _db.User.FirstOrDefaultAsync(u => u.Id == UserId);
+            var UserRoles = await _userManager.GetRolesAsync(ApplicationUser);
+
+            UserVM userVM = new UserVM()
             {
-                var result = await getUserVM(SD.Role_Customer);
-                return Ok(result);
-            }
+                Id = ApplicationUser.Id,
+                FullName = ApplicationUser.FullName,
+                Email = ApplicationUser.Email,
+                Phone = ApplicationUser.PhoneNumber,
+                Role = UserRoles.ToList()
+            };
+            return Ok(userVM);
         }
 
-
-        [HttpGet("CheckAuthentication")]
+        [HttpGet("check-authentication")]
         public IActionResult CheckAuthentication()
         {
             return Ok("authencation success!");
         }
         [Authorize(Roles = SD.Role_Admin)]
-        [HttpGet("CheckIsAdmin")]
+        [HttpGet("check-is-admin")]
         public IActionResult CheckAdmin()
         {
             return Ok("role admin");
         }
         [Authorize(Roles = SD.Role_Employee)]
-        [HttpPost("CheckIsEmployee")]
+        [HttpGet("check-is-employee")]
         public IActionResult CheckEmp()
         {
             return Ok("Role Employee");
         }
         [Authorize(Roles = SD.Role_Customer)]
-        [HttpPut("CheckIsCustomer")]
+        [HttpGet("check-is-customer")]
         public IActionResult CheckCustomer()
         {
             return Ok("Role customer");
