@@ -3,6 +3,7 @@ using IotSupplyStore.Models;
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models.UpsertModel;
 using IotSupplyStore.Models.ViewModel;
+using IotSupplyStore.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,11 +16,11 @@ namespace IotSupplyStore.Controllers.Customer
     [Route("api/order")]
     public class CartController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
         public ApiResponse _response;
-        public CartController(ApplicationDbContext db)
+        public CartController(IUnitOfWork db)
         {
-            _db = db;
+            _unitOfWork = db;
             _response = new ApiResponse();
         }
 
@@ -27,18 +28,18 @@ namespace IotSupplyStore.Controllers.Customer
         [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetOrder()
         {
-            // Get User ID from Claims
+            // Get ApplicationUsers ID from Claims
             var UserId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
 
             // Get list orders of user having payment's pending
-            var UserOrder = await _db.Orders.Where(u => u.ApplicationUserId == UserId && u.PaymentStatus == false).ToListAsync();
+            var UserOrder = await _unitOfWork.Order.GetAllAsync(u => u.ApplicationUserId == UserId && u.PaymentStatus == false);
 
             // Define List Order
             List<OrderVM> ListOrder = new List<OrderVM>();
 
             foreach (var order in UserOrder)
             {
-                var DetailOrder = await _db.ProductOrders.Where(u => u.OrderId == order.Id).ToListAsync();
+                var DetailOrder = await _unitOfWork.ProductOrder.GetAllAsync(u => u.OrderId == order.Id);
                 ListOrder.Add(new OrderVM()
                 {
                     Order = order,
@@ -57,10 +58,10 @@ namespace IotSupplyStore.Controllers.Customer
         public async Task<IActionResult> MakeAnOrder(List<ShoppingCartUpsert> items)
         {
             var CustomerId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
-            var Customer = await _db.User.AsNoTracking().FirstOrDefaultAsync(User => User.Id == CustomerId);
+            var Customer = await _unitOfWork.ApplicationUser.GetFirstOrDefaultAsync(User => User.Id == CustomerId,false);
 
             var ProductOrdersList = new List<ProductOrder>();
-            var ProductEnitity = await _db.Products.ToListAsync();
+            var ProductEnitity = await _unitOfWork.Product.GetAllAsync();
 
             string NewOrderId = Guid.NewGuid().ToString();
             float OrderTotal = 0;
@@ -89,7 +90,7 @@ namespace IotSupplyStore.Controllers.Customer
                 ProductEnitity.FirstOrDefault(u => u.Id == item.ProductId).Quantity = CheckQuantityFromRepository - item.Count;
             }
 
-            var NewOrder = await _db.Orders.AddAsync(new Order()
+            await _unitOfWork.Order.Add(new Order()
             {
                 Id = NewOrderId,
                 ApplicationUserId = CustomerId,
@@ -99,8 +100,8 @@ namespace IotSupplyStore.Controllers.Customer
                 OrderTotal = OrderTotal
             });
 
-            _db.ProductOrders.AddRange(ProductOrdersList);
-            await _db.SaveChangesAsync();
+            await _unitOfWork.ProductOrder.AddRange(ProductOrdersList);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.Message = "Added successfully";

@@ -1,6 +1,7 @@
 ﻿using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
 using IotSupplyStore.Models.DtoModel;
+using IotSupplyStore.Repository.IRepository;
 using IotSupplyStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -14,13 +15,13 @@ namespace IotSupplyStore.Controllers.Employee
     [ApiController]
     public class EmployeeController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        public EmployeeController(ApplicationDbContext db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public EmployeeController(IUnitOfWork db, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
         {
-            _db = db;
+            _unitOfWork = db;
             _userManager = userManager;
             _roleManager = roleManager;
         }
@@ -56,17 +57,17 @@ namespace IotSupplyStore.Controllers.Employee
         [AllowAnonymous]
         public async Task<IActionResult> RegisterEmployee([FromBody] EmployeeRegisterRequestDTO model)
         {
-            ApplicationUser userFromDb = await _db.User.FirstOrDefaultAsync(u => u.FullName.ToLower() == model.Name.ToLower());
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetFirstOrDefaultAsync(u => u.FullName.ToLower() == model.Name.ToLower(),false);
             if (userFromDb != null)
             {
                 return BadRequest("This user has already exist!!!");
             }
-            if (model.citizenIdentification == null)
+            if (model.CitizenIdentification == null)
             {
                 return BadRequest("This employee must have Citizen Identification");
             }
 
-            var newEmployeeRequest = new EmployeeRequest()
+            var NewEmployeeRequest = new EmployeeRequest()
             {
                 UserName = model.UserName,
                 Role = model.Role,
@@ -75,10 +76,10 @@ namespace IotSupplyStore.Controllers.Employee
                 PhoneNumber = model.PhoneNumber,
                 AvatarLink = model.AvatarLink,
                 Address = model.Address,
-                CitizenIdentification = model.citizenIdentification
+                CitizenIdentification = model.CitizenIdentification
             };
-            _db.EmployeeRequests.Add(newEmployeeRequest);
-            _db.SaveChanges();
+            await _unitOfWork.EmployeeRequest.Add(NewEmployeeRequest);
+            await _unitOfWork.Save();
 
             return Ok("Requested");
         }

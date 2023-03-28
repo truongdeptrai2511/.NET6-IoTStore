@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using IotSupplyStore.Utility;
 using System.Net;
 using IotSupplyStore.Models.DtoModel;
+using IotSupplyStore.Repository.IRepository;
 
 namespace IotSupplyStore.Controllers.Employee
 {
@@ -15,12 +16,12 @@ namespace IotSupplyStore.Controllers.Employee
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
         private ApiResponse _response;
 
-        public CategoryController(ApplicationDbContext db)
+        public CategoryController(IUnitOfWork db)
         {
-            _db = db;
+            _unitOfWork = db;
             _response = new ApiResponse();
         }
 
@@ -30,7 +31,7 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> GetCategories()
         {
-            var categories = await _db.Categories.ToListAsync();
+            var categories = await _unitOfWork.Category.GetAllAsync();
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.Result = categories;
@@ -45,7 +46,7 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> GetCategory(int id)
         {
-            var category = await _db.Categories.FindAsync(id);
+            var category = await _unitOfWork.Category.GetAllAsync(u => u.Id == id);
 
             if (category == null)
             {
@@ -70,7 +71,7 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> PutCategory(int id, CategoryUpsert updateCategory)
         {
-            var categoryFromDb = _db.Categories.Find(id);
+            var categoryFromDb = await _unitOfWork.Category.GetFirstOrDefaultAsync(u => u.Id == id);
             if (categoryFromDb == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
@@ -86,7 +87,7 @@ namespace IotSupplyStore.Controllers.Employee
 
             try
             {
-                await _db.SaveChangesAsync();
+                await _unitOfWork.Save();
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -132,8 +133,8 @@ namespace IotSupplyStore.Controllers.Employee
                 CategoryName = category.CategoryName
             };
 
-            _db.Categories.Add(newCategory);
-            await _db.SaveChangesAsync();
+            await _unitOfWork.Category.Add(newCategory);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.NoContent;
             _response.Result = newCategory;
@@ -148,7 +149,7 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var category = await _db.Categories.FindAsync(id);
+            var category = await _unitOfWork.Category.GetFirstOrDefaultAsync(u => u.Id == id);
             if (category == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
@@ -159,8 +160,8 @@ namespace IotSupplyStore.Controllers.Employee
                 return new JsonResult(_response);
             }
 
-            _db.Categories.Remove(category);
-            await _db.SaveChangesAsync();
+            _unitOfWork.Category.Remove(category);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.NoContent;
             _response.Message = "Category's deleted";
@@ -172,7 +173,8 @@ namespace IotSupplyStore.Controllers.Employee
 
         private bool CategoryExists(string name)
         {
-            return _db.Categories.Any(e => e.CategoryName == name);
+            var entity = _unitOfWork.Category.GetFirstOrDefault(e => e.CategoryName == name);
+            return (entity == null) ? false : true;
         }
     }
 }

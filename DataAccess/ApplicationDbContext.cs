@@ -11,10 +11,10 @@ namespace IotSupplyStore.DataAccess
         public DbSet<Category> Categories { get; set; }
         public DbSet<Order> Orders { get; set; }
         public DbSet<Suppliers> Suppliers { get; set; }
-        public DbSet<ApplicationUser> User { get; set; }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<ProductOrder> ProductOrders { get; set; }
         public DbSet<EmployeeRequest> EmployeeRequests { get; set; }
-        
+        public DbSet<OrderStatus> OrderStatus { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

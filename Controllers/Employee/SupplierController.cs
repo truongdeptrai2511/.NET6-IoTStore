@@ -1,11 +1,10 @@
-﻿using IotSupplyStore.DataAccess;
-using IotSupplyStore.Models;
+﻿using IotSupplyStore.Models;
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models.UpsertModel;
+using IotSupplyStore.Repository.IRepository;
 using IotSupplyStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace IotSupplyStore.Controllers.Employee
@@ -15,20 +14,21 @@ namespace IotSupplyStore.Controllers.Employee
     [Authorize]
     public class SupplierController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
         private ApiResponse _response;
 
-        public SupplierController(ApplicationDbContext db)
+        public SupplierController(IUnitOfWork db)
         {
-            _db = db;
+            _unitOfWork = db;
             _response = new ApiResponse();
         }
 
+        [ResponseCache(Duration = 60)]
         [Authorize(Roles = SD.Role_Admin)]
         [HttpGet]
         public async Task<IActionResult> GetAllSuppliers()
         {
-            var suppliers = await _db.Suppliers.ToListAsync();
+            var suppliers = await _unitOfWork.Supplier.GetAllAsync();
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.Result = suppliers;
@@ -38,11 +38,12 @@ namespace IotSupplyStore.Controllers.Employee
             return new JsonResult(_response);
         }
 
+        [ResponseCache(Duration = 60)]
         [HttpGet("{id}")]
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> GetSupllierById(int id)
         {
-            var supplier = await _db.Suppliers.FindAsync(id);
+            var supplier = await _unitOfWork.Supplier.GetFirstOrDefaultAsync(x => x.Id == id, false);
 
             if (supplier == null)
             {
@@ -66,11 +67,12 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> AddSupplier(SupplierUpsert supplier)
         {
-            if (SupplierExists(supplier.SupplierName))
+            var CheckNameDuplication = await _unitOfWork.Supplier.GetFirstOrDefaultAsync(u => u.SupplierName == supplier.SupplierName);
+            if (CheckNameDuplication != null)
             {
                 _response.StatusCode = HttpStatusCode.BadRequest;
                 _response.Result = null;
-                _response.Message = "Cannot add this supplier";
+                _response.Message = "Cannot assign this supplier, may be the name is duplicated";
                 _response.ErrorMessages.Add("This supplier has already exist");
 
                 return new JsonResult(_response);
@@ -83,8 +85,8 @@ namespace IotSupplyStore.Controllers.Employee
                 SupplierFax = supplier.SupplierFax,
             };
 
-            _db.Suppliers.Add(newSupplier);
-            await _db.SaveChangesAsync();
+            await _unitOfWork.Supplier.Add(newSupplier);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.NoContent;
             _response.Result = newSupplier;
@@ -98,7 +100,7 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> UpdateSupplier(int id, SupplierUpsert updateSupplier)
         {
-            var SupplierFromDb = _db.Suppliers.Find(id);
+            var SupplierFromDb = await _unitOfWork.Supplier.GetFirstOrDefaultAsync(x => x.Id == id, false);
             if (SupplierFromDb == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
@@ -115,26 +117,7 @@ namespace IotSupplyStore.Controllers.Employee
             SupplierFromDb.SupplierFax = updateSupplier.SupplierFax;
             SupplierFromDb.UpdatedAt = DateTime.Now;
 
-            try
-            {
-                await _db.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (SupplierExists(updateSupplier.SupplierName))
-                {
-                    _response.StatusCode = HttpStatusCode.NoContent;
-                    _response.Result = null;
-                    _response.Message = "Fail to update";
-                    //_response.ErrorMessages.Add($"Supplier with {id} is not found");
-
-                    return new JsonResult(_response);
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.NoContent;
             _response.Result = SupplierFromDb;
@@ -148,7 +131,7 @@ namespace IotSupplyStore.Controllers.Employee
         [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> DeleteSupplier(int id)
         {
-            var SupplierFromDb = await _db.Suppliers.FindAsync(id);
+            var SupplierFromDb = await _unitOfWork.Supplier.GetFirstOrDefaultAsync(x => x.Id == id, false);
             if (SupplierFromDb == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
@@ -159,8 +142,8 @@ namespace IotSupplyStore.Controllers.Employee
                 return new JsonResult(_response);
             }
 
-            _db.Suppliers.Remove(SupplierFromDb);
-            await _db.SaveChangesAsync();
+            _unitOfWork.Supplier.Remove(SupplierFromDb);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.NoContent;
             _response.Message = "Supplier's deleted";
@@ -168,11 +151,6 @@ namespace IotSupplyStore.Controllers.Employee
             _response.ErrorMessages = null;
 
             return new JsonResult(_response);
-        }
-
-        private bool SupplierExists(string name)
-        {
-            return _db.Suppliers.Any(e => e.SupplierName == name);
         }
     }
 }

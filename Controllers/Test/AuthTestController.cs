@@ -36,7 +36,7 @@ namespace IotSupplyStore.Controllers.Test
                 return BadRequest("This user hasn't authenticated");
             }
 
-            var ApplicationUser = await _db.User.AsNoTracking().FirstOrDefaultAsync(u => u.Id == UserId);
+            var ApplicationUser = await _db.ApplicationUsers.AsNoTracking().FirstOrDefaultAsync(u => u.Id == UserId);
             var UserRoles = await _userManager.GetRolesAsync(ApplicationUser);
 
             UserVM userVM = new UserVM()

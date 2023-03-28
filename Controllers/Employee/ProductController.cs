@@ -6,6 +6,7 @@ using IotSupplyStore.Models;
 using IotSupplyStore.Models.DtoModel;
 using System.Net;
 using IotSupplyStore.Models.UpsertModel;
+using IotSupplyStore.Repository.IRepository;
 
 namespace IotSupplyStore.Controllers.Employee
 {
@@ -15,11 +16,11 @@ namespace IotSupplyStore.Controllers.Employee
     public class ProductController : ControllerBase
     {
         private ApiResponse _response;
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ProductController(ApplicationDbContext db)
+        public ProductController(IUnitOfWork unitOfWork)
         {
-            _db = db;
+            _unitOfWork = unitOfWork;
             _response = new ApiResponse();
         }
 
@@ -27,7 +28,7 @@ namespace IotSupplyStore.Controllers.Employee
         [ResponseCache(Duration = 60)]
         public async Task<ActionResult> GetAllProducts() //Get all newProduct database 
         {
-            var ProductList = await _db.Products.ToListAsync();
+            var ProductList = await _unitOfWork.Product.GetAllAsync();
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.Message = "All Products're got";
@@ -41,7 +42,7 @@ namespace IotSupplyStore.Controllers.Employee
         [ResponseCache(Duration = 60)]
         public async Task<ActionResult<Product>> GetProduct(int id)// Get newProduct by Id
         {
-            var product = await _db.Products.FirstOrDefaultAsync(x => x.Id == id);
+            var product = await _unitOfWork.Product.GetFirstOrDefaultAsync(x => x.Id == id,false);
 
             if (product == null)
             {
@@ -82,7 +83,7 @@ namespace IotSupplyStore.Controllers.Employee
             // which is used to create a new Product entity that is added to the database
 
             // Add the new product to the database context
-            _db.Products.Add(new Product
+            await _unitOfWork.Product.Add(new Product
             {
                 ProductName = newProduct.ProductName,
                 CategoryId = newProduct.CategoryId,
@@ -96,7 +97,7 @@ namespace IotSupplyStore.Controllers.Employee
             });
 
             // Save changes to the database
-            await _db.SaveChangesAsync();
+            await _unitOfWork.Save();
 
             // Create an HTTP response indicating that the operation was successful
             _response.StatusCode = HttpStatusCode.OK;
@@ -112,7 +113,7 @@ namespace IotSupplyStore.Controllers.Employee
         // Update newProduct
         public async Task<IActionResult> UpdateProduct(int id, ProductUpsert updateProduct)
         {
-            var existingProduct = await _db.Products.FindAsync(id);
+            var existingProduct = await _unitOfWork.Product.GetFirstOrDefaultAsync(u => u.Id == id);
             if (existingProduct == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
@@ -131,8 +132,8 @@ namespace IotSupplyStore.Controllers.Employee
             existingProduct.Description = updateProduct.Description;
             existingProduct.ImgName = updateProduct.ImgName;
 
-            _db.Update(existingProduct);
-            await _db.SaveChangesAsync();
+            _unitOfWork.Product.Update(existingProduct);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.Message = "Product's updated";
@@ -145,7 +146,7 @@ namespace IotSupplyStore.Controllers.Employee
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProduct(int id)      //Delete newProduct
         {
-            var product = await _db.Products.FindAsync(id);
+            var product = await _unitOfWork.Product.GetFirstOrDefaultAsync(u => u.Id == id);
             if (product == null)
             {
                 _response.StatusCode = HttpStatusCode.NotFound;
@@ -154,8 +155,8 @@ namespace IotSupplyStore.Controllers.Employee
                 _response.ErrorMessages.Add("Cannot find any products in repository");
             }
 
-            _db.Products.Remove(product);
-            await _db.SaveChangesAsync();
+            _unitOfWork.Product.Remove(product);
+            await _unitOfWork.Save();
 
             _response.StatusCode = HttpStatusCode.NoContent;
             _response.Message = "Product's deleted";

@@ -1,6 +1,7 @@
 ﻿using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models.ViewModel;
+using IotSupplyStore.Repository.IRepository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,11 +14,11 @@ namespace IotSupplyStore.Controllers.Admin
     //[Authorize]
     public class OrderController : ControllerBase
     {
-        private readonly ApplicationDbContext _db;
+        private readonly IUnitOfWork _unitOfWork;
         public ApiResponse _response;
-        public OrderController(ApplicationDbContext db)
+        public OrderController(IUnitOfWork db)
         {
-            _db = db;
+            _unitOfWork = db;
             _response = new ApiResponse();
         }
 
@@ -25,7 +26,7 @@ namespace IotSupplyStore.Controllers.Admin
         [HttpGet("get-all-order")]
         public async Task<IActionResult> GetAllOrders()
         {
-            var OrdersList = await _db.Orders.AsNoTracking().ToListAsync();
+            var OrdersList = await _unitOfWork.Order.GetAllAsync();
 
             if (OrdersList == null)
             {
@@ -33,7 +34,8 @@ namespace IotSupplyStore.Controllers.Admin
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     Message = "order not found",
-                    Result = null
+                    Result = null,
+                    ErrorMessages = null
                 });
             }
 
@@ -42,7 +44,7 @@ namespace IotSupplyStore.Controllers.Admin
 
             foreach (var order in OrdersList)
             {
-                var DetailOrder = await _db.ProductOrders.Where(u => u.OrderId == order.Id).ToListAsync();
+                var DetailOrder = await _unitOfWork.ProductOrder.GetAllAsync(u => u.OrderId == order.Id);
                 ListOrder.Add(new OrderVM()
                 {
                     Order = order,
@@ -63,7 +65,7 @@ namespace IotSupplyStore.Controllers.Admin
         [ResponseCache(Duration = 60)]
         public async Task<IActionResult> GetDetailOrdersById(string orderId)
         {
-            var order = await _db.Orders.FirstOrDefaultAsync(u => u.Id == orderId);
+            var order = await _unitOfWork.Order.GetFirstOrDefaultAsync(u => u.Id == orderId,false);
             if (order == null)
             {
                 return new JsonResult(new ApiResponse()
@@ -74,7 +76,7 @@ namespace IotSupplyStore.Controllers.Admin
                 });
             }
 
-            var DetailOrder = await _db.ProductOrders.Where(u => u.OrderId == orderId).ToListAsync();
+            var DetailOrder = await _unitOfWork.ProductOrder.GetAllAsync(u => u.OrderId == orderId);
             OrderVM orderVM = new OrderVM()
             {
                 Order = order,
@@ -96,14 +98,14 @@ namespace IotSupplyStore.Controllers.Admin
         public async Task<IActionResult> GetOrdersByUser()
         {
             var UserId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
-            var UserOrdersList = await _db.Orders.Where(u => u.ApplicationUserId == UserId && u.PaymentStatus == false).ToListAsync();
+            var UserOrdersList = await _unitOfWork.Order.GetAllAsync(u => u.ApplicationUserId == UserId && u.PaymentStatus == false);
 
             // Define List Order
             List<OrderVM> ListOrder = new List<OrderVM>();
 
             foreach (var order in UserOrdersList)
             {
-                var DetailOrder = await _db.ProductOrders.AsNoTracking().Where(u => u.OrderId == order.Id).ToListAsync();
+                var DetailOrder = await _unitOfWork.ProductOrder.GetAllAsync(u => u.OrderId == order.Id);
                 ListOrder.Add(new OrderVM()
                 {
                     Order = order,
