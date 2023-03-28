@@ -1,5 +1,4 @@
 ﻿using IotSupplyStore.DataAccess;
-using IotSupplyStore.Models;
 using IotSupplyStore.Models.UpsertModel;
 using IotSupplyStore.Models.ViewModel;
 using IotSupplyStore.Utility;
@@ -29,7 +28,7 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet("{id}")]
-        [Authorize(Roles = SD.Role_Customer + "," + SD.Role_Admin)]
+        [Authorize(Roles = SD.Role_Admin)]
         public async Task<IActionResult> GetCustomer(string id)
         {
             var obj = await _db.User.FirstOrDefaultAsync(x => x.Id == id);
@@ -45,8 +44,7 @@ namespace IotSupplyStore.Controllers
                 Email = obj.Email,
                 Avatar = obj.Avatar,
                 Address = obj.Address,
-                CreatedAt = obj.CreatedAt,
-                UpdatedAt = obj.UpdatedAt,
+                CreatedAt = obj.CreatedAt
             };
             return Ok(result);
         }
