@@ -10,32 +10,53 @@ using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using System.Text;
+using IotSupplyStore.Repository.IRepository;
+using IotSupplyStore.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-// "DevelopEnvironment" is using for database of developer, change it to "DefaultConnection" if want to use database server
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DevelopEnvironment")));
-
+// Controller Service Configuration
 builder.Services.AddControllers().AddNewtonsoftJson(options =>
 {
     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
 });
+builder.Services.AddResponseCaching();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Add DI
+// "DevelopEnvironment" is using for database of developer, change it to "DefaultConnection" if want to use database server
+#region Database configuration
+
+//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
+//    builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
+    builder.Configuration.GetConnectionString("DevelopEnvironment")));
+
+#endregion
+
+// Add DI Service
+#region DI Service
+
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 
+#endregion
+
+
 //services cors
+#region Service CORS
+
 builder.Services.AddCors(p => p.AddPolicy("AllowAllHeadersPolicy", builder =>
 {
     builder.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
 }));
 
+#endregion
+
+
 // adds authentication services to the application's service collection
+#region Identity Services set up
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
@@ -54,7 +75,7 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Lockout.MaxFailedAccessAttempts = 5;
     options.Lockout.AllowedForNewUsers = true;
 
-    // User settings.
+    // ApplicationUsers settings.
     options.User.AllowedUserNameCharacters =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = false;
@@ -79,7 +100,10 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+#endregion
+
 // add authorization for swagger
+#region Swagger Configuration
 builder.Services.AddSwaggerGen(options =>
 {
     options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
@@ -111,6 +135,8 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+#endregion
+
 var app = builder.Build();
 
 app.UseCors("AllowAllHeadersPolicy");
@@ -121,11 +147,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-app.UseAuthentication();
 
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
