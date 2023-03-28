@@ -6,13 +6,12 @@ using IotSupplyStore.Models.ViewModel;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol;
 using System.Net;
 
 namespace IotSupplyStore.Controllers
 {
     [ApiController]
-    //[Authorize]
+    [Authorize]
     [Route("api/order")]
     public class CartController : ControllerBase
     {
@@ -25,37 +24,50 @@ namespace IotSupplyStore.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetItemsFromCart()
+        public async Task<IActionResult> GetOrder()
         {
+            // Get User ID from Claims
             var UserId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
-            var CartsList = await _db.ShoppingCarts.Where(u => u.ApplicationUserId == UserId).ToListAsync();
 
-            return Ok(CartsList);
+            // Get list orders of user having payment's pending
+            var UserOrder = await _db.Orders.Where(u => u.ApplicationUserId == UserId && u.PaymentStatus == false).ToListAsync();
+
+            // Define List Order
+            List<OrderVM> ListOrder = new List<OrderVM>();
+
+            foreach (var order in UserOrder)
+            {
+                var DetailOrder = await _db.ProductOrders.Where(u => u.OrderId == order.Id).ToListAsync();
+                ListOrder.Add(new OrderVM()
+                {
+                    Order = order,
+                    ProductOrders = DetailOrder
+                });
+            }
+
+            _response.Message = "success";
+            _response.Result = ListOrder;
+            _response.StatusCode = HttpStatusCode.OK;
+            _response.ErrorMessages = null;
+            return new JsonResult(_response);
         }
 
         [HttpPost]
         public async Task<IActionResult> MakeAnOrder(List<ShoppingCartUpsert> items)
         {
             var CustomerId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
-            var Customer = await _db.User.FirstOrDefaultAsync(User => User.Id == CustomerId);
-            float OrderTotal = 0;
+            var Customer = await _db.User.AsNoTracking().FirstOrDefaultAsync(User => User.Id == CustomerId);
 
             var ProductOrdersList = new List<ProductOrder>();
-            var product = await _db.Products.ToListAsync();
+            var ProductEnitity = await _db.Products.ToListAsync();
 
-            _db.Orders.Add(new Order()
-            {
-                CustomerName = Customer.FullName,
-                PhoneNumber = Customer.PhoneNumber,
-                Address = Customer.Address,
-                ApplicationUserId = CustomerId
-            });
-            _db.SaveChanges();
-            var OrderId = _db.Orders.ToList().LastOrDefault(u => u.ApplicationUserId == CustomerId).Id;
+            string NewOrderId = Guid.NewGuid().ToString();
+            float OrderTotal = 0;
 
             foreach (var item in items)
             {
-                var CheckQuantityFromRepository = _db.Products.FirstOrDefault(u => u.Id == item.ProductId).Quantity;
+                var CheckQuantityFromRepository = ProductEnitity.FirstOrDefault(u => u.Id == item.ProductId).Quantity;
+
                 if (item.Count > CheckQuantityFromRepository)
                 {
                     _response.Message = $"Item with id {item.ProductId} it out of stock";
@@ -68,20 +80,25 @@ namespace IotSupplyStore.Controllers
                 {
                     Count = item.Count,
                     ProductId = item.ProductId,
-                    OrderId = OrderId,
-                    Price = product.FirstOrDefault(u => u.Id == item.ProductId).Price * item.Count
+                    Price = item.Price,
+                    OrderId = NewOrderId
                 });
-                OrderTotal += ProductOrdersList.Last().Price;
+                OrderTotal += item.Price;
 
-                product.FirstOrDefault(u => u.Id == item.ProductId).Quantity = CheckQuantityFromRepository - item.Count;
+                ProductEnitity.FirstOrDefault(u => u.Id == item.ProductId).Quantity = CheckQuantityFromRepository - item.Count;
             }
 
+            var NewOrder = await _db.Orders.AddAsync(new Order()
+            {
+                Id = NewOrderId,
+                ApplicationUserId = CustomerId,
+                CustomerName = Customer.FullName,
+                PhoneNumber = Customer.PhoneNumber,
+                Address = Customer.Address,
+                OrderTotal = OrderTotal
+            });
+
             _db.ProductOrders.AddRange(ProductOrdersList);
-
-            var order = _db.Orders.ToList().LastOrDefault(u => u.Id == OrderId);
-            order.OrderTotal = OrderTotal;
-
-            _db.Orders.Update(order);
             await _db.SaveChangesAsync();
 
             _response.StatusCode = HttpStatusCode.OK;
