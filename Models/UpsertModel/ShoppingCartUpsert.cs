@@ -6,5 +6,6 @@ namespace IotSupplyStore.Models.UpsertModel
     {
         public int ProductId { get; set; }
         public int Count { get; set; }
+        public float Price { get; set; }
     }
 }

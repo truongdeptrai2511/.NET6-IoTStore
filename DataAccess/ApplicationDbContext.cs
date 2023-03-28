@@ -14,7 +14,6 @@ namespace IotSupplyStore.DataAccess
         public DbSet<ApplicationUser> User { get; set; }
         public DbSet<ProductOrder> ProductOrders { get; set; }
         public DbSet<EmployeeRequest> EmployeeRequests { get; set; }
-        public DbSet<ShoppingCart> ShoppingCarts { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -172,11 +172,8 @@ namespace IotSupplyStore.Migrations
 
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
@@ -299,11 +296,11 @@ namespace IotSupplyStore.Migrations
                     b.Property<int>("Count")
                         .HasColumnType("int");
 
-                    b.Property<int>("OrderId")
-                        .HasColumnType("int");
+                    b.Property<string>("OrderId")
+                        .HasColumnType("nvarchar(450)");
 
-                    b.Property<int>("Price")
-                        .HasColumnType("int");
+                    b.Property<float>("Price")
+                        .HasColumnType("real");
 
                     b.Property<int>("ProductId")
                         .HasColumnType("int");
@@ -514,7 +511,7 @@ namespace IotSupplyStore.Migrations
             modelBuilder.Entity("IotSupplyStore.Models.Order", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("Orders")
+                        .WithMany()
                         .HasForeignKey("ApplicationUserId");
 
                     b.Navigation("ApplicationUser");
@@ -529,7 +526,7 @@ namespace IotSupplyStore.Migrations
                         .IsRequired();
 
                     b.HasOne("IotSupplyStore.Models.Suppliers", "Suppliers")
-                        .WithMany("Products")
+                        .WithMany()
                         .HasForeignKey("SupplierId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -543,9 +540,7 @@ namespace IotSupplyStore.Migrations
                 {
                     b.HasOne("IotSupplyStore.Models.Order", "Order")
                         .WithMany()
-                        .HasForeignKey("OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("OrderId");
 
                     b.HasOne("IotSupplyStore.Models.Product", "Product")
                         .WithMany()
@@ -561,7 +556,7 @@ namespace IotSupplyStore.Migrations
             modelBuilder.Entity("IotSupplyStore.Models.ShoppingCart", b =>
                 {
                     b.HasOne("IotSupplyStore.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany("ShoppingCarts")
+                        .WithMany()
                         .HasForeignKey("ApplicationUserId");
 
                     b.HasOne("IotSupplyStore.Models.Product", "Product")
@@ -624,18 +619,6 @@ namespace IotSupplyStore.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.ApplicationUser", b =>
-                {
-                    b.Navigation("Orders");
-
-                    b.Navigation("ShoppingCarts");
-                });
-
-            modelBuilder.Entity("IotSupplyStore.Models.Suppliers", b =>
-                {
-                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

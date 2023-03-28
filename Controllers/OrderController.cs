@@ -21,9 +21,45 @@ namespace IotSupplyStore.Controllers
             _response = new ApiResponse();
         }
 
+        [HttpGet("get-all-order")]
+        public async Task<IActionResult> GetAllOrders()
+        {
+            var OrdersList = await _db.Orders.AsNoTracking().ToListAsync();
+
+            if (OrdersList == null)
+            {
+                return new JsonResult(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "order not found",
+                    Result = null
+                });
+            }
+
+            // Define List Order
+            List<OrderVM> ListOrder = new List<OrderVM>();
+
+            foreach (var order in OrdersList)
+            {
+                var DetailOrder = await _db.ProductOrders.Where(u => u.OrderId == order.Id).ToListAsync();
+                ListOrder.Add(new OrderVM()
+                {
+                    Order = order,
+                    ProductOrders = DetailOrder
+                });
+            }
+
+            return new JsonResult(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "success",
+                Result = ListOrder,
+                ErrorMessages = null
+            });
+        }
 
         [HttpGet("id")]
-        public async Task<IActionResult> GetDetailForOrder(int orderId)
+        public async Task<IActionResult> GetDetailOrdersById(string orderId)
         {
             var order = await _db.Orders.FirstOrDefaultAsync(u => u.Id == orderId);
             if (order == null)
@@ -36,7 +72,7 @@ namespace IotSupplyStore.Controllers
                 });
             }
 
-            var DetailOrder = await _db.ProductOrders.Where(u => u.Id == orderId).ToListAsync();
+            var DetailOrder = await _db.ProductOrders.Where(u => u.OrderId == orderId).ToListAsync();
             OrderVM orderVM = new OrderVM()
             {
                 Order = order,
@@ -54,19 +90,26 @@ namespace IotSupplyStore.Controllers
 
         [Authorize]
         [HttpGet("get-order-by-user")]
-        public async Task<IActionResult> GetOrderByUser()
+        public async Task<IActionResult> GetOrdersByUser()
         {
             var UserId = User.Claims.FirstOrDefault(u => u.Type == "id").Value;
-            var UserOrder = await _db.Orders.LastOrDefaultAsync(u => u.ApplicationUserId == UserId);
-            var DetailOrder = await _db.ProductOrders.Where(u => u.Id == UserOrder.Id).ToListAsync();
+            var UserOrdersList = await _db.Orders.Where(u => u.ApplicationUserId == UserId && u.PaymentStatus == false).ToListAsync();
 
-            OrderVM orderVM = new OrderVM()
+            // Define List Order
+            List<OrderVM> ListOrder = new List<OrderVM>();
+
+            foreach (var order in UserOrdersList)
             {
-                Order = UserOrder,
-                ProductOrders = DetailOrder
-            };
+                var DetailOrder = await _db.ProductOrders.AsNoTracking().Where(u => u.OrderId == order.Id).ToListAsync();
+                ListOrder.Add(new OrderVM()
+                {
+                    Order = order,
+                    ProductOrders = DetailOrder
+                });
+            }
+
             _response.Message = "success";
-            _response.Result = orderVM;
+            _response.Result = ListOrder;
             _response.StatusCode = HttpStatusCode.OK;
             _response.ErrorMessages = null;
             return new JsonResult(_response);

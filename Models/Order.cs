@@ -6,11 +6,11 @@ namespace IotSupplyStore.Models
     public class Order
     {
         [Key]
-        public int Id { get; set; }
+        public string Id { get; set; }
 
         public float PriceSale { get; set; } = 0;
         public float OrderTotal { get; set; }
-        public bool OrderStatus { get; set; } = false;
+        public bool OrderStatus { get; set; } = true;
         public bool PaymentStatus { get; set; } = false;
 
 

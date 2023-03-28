@@ -11,7 +11,7 @@ namespace IotSupplyStore.Models
         public int Count { get; set; }
         public float Price { get; set; }
 
-        public int OrderId { get; set; }
+        public string OrderId { get; set; }
         [ForeignKey("OrderId")]
         public Order Order { get; set; }
 
