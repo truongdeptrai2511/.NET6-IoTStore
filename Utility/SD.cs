@@ -7,6 +7,8 @@
         public const string Role_Shipper = "shipper";
         public const string Role_Customer = "customer";
 
+
+
         public const string StatusPending = "Pending";
         public const string StatusApproved = "Approved";
         public const string StatusInProcess = "InProcess";
