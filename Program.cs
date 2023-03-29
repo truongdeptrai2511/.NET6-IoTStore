@@ -12,6 +12,7 @@ using Newtonsoft.Json.Serialization;
 using System.Text;
 using IotSupplyStore.Repository.IRepository;
 using IotSupplyStore.Repository;
+using IotSupplyStore.Utility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,11 +28,11 @@ builder.Services.AddEndpointsApiExplorer();
 // "DevelopEnvironment" is using for database of developer, change it to "DefaultConnection" if want to use database server
 #region Database configuration
 
-//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-//    builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
-    builder.Configuration.GetConnectionString("DevelopEnvironment")));
+    builder.Configuration.GetConnectionString("DefaultConnection")));
+
+//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(
+//    builder.Configuration.GetConnectionString("DevelopEnvironment")));
 
 #endregion
 
@@ -55,7 +56,7 @@ builder.Services.AddCors(p => p.AddPolicy("AllowAllHeadersPolicy", builder =>
 #endregion
 
 
-// adds authentication services to the application's service collection
+// add authentication services to the application's service collection
 #region Identity Services set up
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -98,6 +99,61 @@ builder.Services.AddAuthentication(options =>
         ValidateAudience = false,
         ValidateLifetime = true
     };
+});
+
+#endregion
+
+// add policy authentication
+#region Policy Set up
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy(SD.Policy_SuperAdmin, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Admin);
+        policyBuilder.RequireUserName("rekii");
+    });
+
+    options.AddPolicy(SD.Policy_AccountManager, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Admin);
+    });
+
+    options.AddPolicy(SD.Policy_CategoryManager, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Employee, SD.Role_Admin);
+    });
+
+    options.AddPolicy(SD.Policy_ProductManager, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Employee, SD.Role_Admin);
+    });
+
+    options.AddPolicy(SD.Policy_SupplierManager, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Employee, SD.Role_Admin);
+    });
+
+    options.AddPolicy(SD.Policy_OrderProcess, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Shipper, SD.Role_Admin, SD.Role_Customer);
+    });
+
+    options.AddPolicy(SD.Policy_EditProfile, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+    });
+
+    options.AddPolicy(SD.Policy_MakeOrder, policyBuilder =>
+    {
+        policyBuilder.RequireAuthenticatedUser();
+        policyBuilder.RequireRole(SD.Role_Customer, SD.Role_Admin);
+    });
 });
 
 #endregion
