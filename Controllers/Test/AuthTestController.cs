@@ -42,6 +42,7 @@ namespace IotSupplyStore.Controllers.Test
             UserVM userVM = new UserVM()
             {
                 Id = ApplicationUser.Id,
+                UserName = ApplicationUser.UserName,
                 FullName = ApplicationUser.FullName,
                 Email = ApplicationUser.Email,
                 Phone = ApplicationUser.PhoneNumber,

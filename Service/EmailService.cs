@@ -9,7 +9,7 @@ namespace IotSupplyStore.Service
     {
         public async Task SendMail(EmailDto emailDto)
         {
-            var fromAddress = new MailAddress("dtnhan1908@gmail.com", "thuphigiaothong.com");
+            var fromAddress = new MailAddress("tannguyen.dut8091@gmail.com", "IotDeviceStore.com");
             var toAddress = new MailAddress(emailDto.ToEmailAddress, emailDto.ToName);
             const string fromPassword = "dfxramejijwpjuch";
             string subject = emailDto.Subject;

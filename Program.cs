@@ -111,7 +111,7 @@ builder.Services.AddAuthorization(options =>
     {
         policyBuilder.RequireAuthenticatedUser();
         policyBuilder.RequireRole(SD.Role_Admin);
-        policyBuilder.RequireUserName("rekii");
+        policyBuilder.RequireClaim("FullName", "Dao Trong Nhan");
     });
 
     options.AddPolicy(SD.Policy_AccountManager, policyBuilder =>

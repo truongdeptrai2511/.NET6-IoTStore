@@ -71,7 +71,7 @@ namespace IotSupplyStore.Controllers.Admin
         [HttpPost("register/customer")] //For Customer
         public async Task<IActionResult> RegisterCustomer([FromBody] CustomerRegisterRequestDTO model)
         {
-            ApplicationUser userFromDb = await _unitOfwork.ApplicationUser.GetFirstOrDefaultAsync(u => u.UserName.ToLower() == model.UserName.ToLower(),false);
+            ApplicationUser userFromDb = await _unitOfwork.ApplicationUser.GetFirstOrDefaultAsync(u => u.UserName.ToLower() == model.UserName.ToLower(), false);
             if (userFromDb != null)
             {
                 return BadRequest("This user has already exist!!!");
@@ -126,7 +126,7 @@ namespace IotSupplyStore.Controllers.Admin
                 Address = empRequest.Address,
                 CitizenIdentification = empRequest.CitizenIdentification
             };
-            string FirstPassword = Guid.NewGuid().ToString();
+            string FirstPassword = "abcde12345";
             try
             {
                 IdentityResult result = await _userManager.CreateAsync(newEmployee, FirstPassword);
@@ -137,16 +137,16 @@ namespace IotSupplyStore.Controllers.Admin
                         if (!_roleManager.RoleExistsAsync(SD.Role_Employee).GetAwaiter().GetResult())
                         {
                             await _roleManager.CreateAsync(new IdentityRole(SD.Role_Employee));
-                            await _userManager.AddToRoleAsync(newEmployee, SD.Role_Employee);
                         }
+                        await _userManager.AddToRoleAsync(newEmployee, SD.Role_Employee);
                     }
                     else if (empRequest.Role == SD.Role_Shipper)
                     {
                         if (!_roleManager.RoleExistsAsync(SD.Role_Shipper).GetAwaiter().GetResult())
                         {
                             await _roleManager.CreateAsync(new IdentityRole(SD.Role_Shipper));
-                            await _userManager.AddToRoleAsync(newEmployee, SD.Role_Shipper);
                         }
+                        await _userManager.AddToRoleAsync(newEmployee, SD.Role_Shipper);
                     }
                     else
                     {
@@ -162,6 +162,18 @@ namespace IotSupplyStore.Controllers.Admin
                 Console.WriteLine(ex);
             }
             return BadRequest("please re-check the information");
+        }
+
+        [HttpGet("get-list-employee-requests")]
+        public async Task<IActionResult> GetListEmployeeRequests()
+        {
+            var empRequest = await _unitOfwork.EmployeeRequest.GetAllAsync();
+            if (empRequest == null)
+            {
+                return BadRequest("No employee request found");
+            }
+
+            return Ok(empRequest);
         }
 
         [HttpPost("login")]
@@ -242,7 +254,7 @@ namespace IotSupplyStore.Controllers.Admin
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPassword model)
         {
-            var applicationUser = await _unitOfwork.ApplicationUser.GetFirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower(),false);
+            var applicationUser = await _unitOfwork.ApplicationUser.GetFirstOrDefaultAsync(u => u.Email.ToLower() == model.Email.ToLower(), false);
             if (applicationUser == null)
             {
                 return BadRequest("cant find this user");
