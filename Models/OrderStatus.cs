@@ -14,6 +14,7 @@ namespace IotSupplyStore.Models
         public bool StatusShipped { get; set; } = false;
         public bool StatusCancelled { get; set; } = false;
         public bool StatusRefunded { get; set; } = false;
+        public bool StatusPayment { get; set; } = false;
 
         public DateTime ShippingDateEstimate { get; set; } = DateTime.Now.AddDays(2);
         public DateTime ShippingDate { get; set; }

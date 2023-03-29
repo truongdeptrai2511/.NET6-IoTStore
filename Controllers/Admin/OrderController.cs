@@ -2,6 +2,7 @@
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models.ViewModel;
 using IotSupplyStore.Repository.IRepository;
+using IotSupplyStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +12,7 @@ namespace IotSupplyStore.Controllers.Admin
 {
     [ApiController]
     [Route("api/order")]
-    //[Authorize]
+    [Authorize(Policy = SD.Policy_OrderProcess)]
     public class OrderController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -92,7 +93,6 @@ namespace IotSupplyStore.Controllers.Admin
             });
         }
 
-        [Authorize]
         [ResponseCache(Duration = 60)]
         [HttpGet("get-order-by-user")]
         public async Task<IActionResult> GetOrdersByUser()

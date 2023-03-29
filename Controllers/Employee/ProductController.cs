@@ -7,12 +7,13 @@ using IotSupplyStore.Models.DtoModel;
 using System.Net;
 using IotSupplyStore.Models.UpsertModel;
 using IotSupplyStore.Repository.IRepository;
+using IotSupplyStore.Utility;
 
 namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = SD.Policy_ProductManager)]
     public class ProductController : ControllerBase
     {
         private ApiResponse _response;

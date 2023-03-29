@@ -1,18 +1,17 @@
-﻿using IotSupplyStore.DataAccess;
-using IotSupplyStore.Models;
+﻿using IotSupplyStore.Models;
 using IotSupplyStore.Models.DtoModel;
 using IotSupplyStore.Models.UpsertModel;
 using IotSupplyStore.Models.ViewModel;
 using IotSupplyStore.Repository.IRepository;
+using IotSupplyStore.Utility;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Net;
 
 namespace IotSupplyStore.Controllers.Customer
 {
     [ApiController]
-    [Authorize]
+    [Authorize(Policy = SD.Policy_MakeOrder)]
     [Route("api/order")]
     public class CartController : ControllerBase
     {
@@ -93,11 +92,11 @@ namespace IotSupplyStore.Controllers.Customer
             await _unitOfWork.Order.Add(new Order()
             {
                 Id = NewOrderId,
-                ApplicationUserId = CustomerId,
+                ApplicationUserId = Customer.Id,
                 CustomerName = Customer.FullName,
                 PhoneNumber = Customer.PhoneNumber,
                 Address = Customer.Address,
-                OrderTotal = OrderTotal
+                OrderTotal = OrderTotal,
             });
 
             await _unitOfWork.ProductOrder.AddRange(ProductOrdersList);
@@ -105,7 +104,7 @@ namespace IotSupplyStore.Controllers.Customer
 
             _response.StatusCode = HttpStatusCode.OK;
             _response.Message = "Added successfully";
-            _response.Result = ProductOrdersList;
+            _response.Result = await _unitOfWork.Order.GetFirstOrDefaultAsync(u => u.Id == NewOrderId);
             _response.ErrorMessages = null;
             return new JsonResult(_response);
         }

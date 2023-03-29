@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(Roles = SD.Role_Employee)]
     [ApiController]
     public class EmployeeController : ControllerBase
     {

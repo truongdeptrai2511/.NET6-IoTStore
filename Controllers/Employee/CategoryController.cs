@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using IotSupplyStore.DataAccess;
 using IotSupplyStore.Models;
 using IotSupplyStore.Models.UpsertModel;
 using Microsoft.AspNetCore.Authorization;
@@ -12,7 +11,7 @@ using IotSupplyStore.Repository.IRepository;
 namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
-    [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
+    [Authorize(Policy = SD.Policy_CategoryManager)]
     [ApiController]
     public class CategoryController : ControllerBase
     {
@@ -28,7 +27,6 @@ namespace IotSupplyStore.Controllers.Employee
         // GET: api/Category
         [HttpGet]
         [ResponseCache(Duration = 60)]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> GetCategories()
         {
             var categories = await _unitOfWork.Category.GetAllAsync();
@@ -43,7 +41,6 @@ namespace IotSupplyStore.Controllers.Employee
 
         // GET: api/Category/5
         [HttpGet("{id}")]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> GetCategory(int id)
         {
             var category = await _unitOfWork.Category.GetAllAsync(u => u.Id == id);
@@ -68,7 +65,6 @@ namespace IotSupplyStore.Controllers.Employee
 
         // PUT: api/Category/5
         [HttpPut("{id}")]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> PutCategory(int id, CategoryUpsert updateCategory)
         {
             var categoryFromDb = await _unitOfWork.Category.GetFirstOrDefaultAsync(u => u.Id == id);
@@ -114,9 +110,7 @@ namespace IotSupplyStore.Controllers.Employee
             return new JsonResult(_response);
         }
 
-        // POST: api/Category
         [HttpPost]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> AddCategory(CategoryUpsert category)
         {
             if (CategoryExists(category.CategoryName))
@@ -144,9 +138,7 @@ namespace IotSupplyStore.Controllers.Employee
             return new JsonResult(_response);
         }
 
-        // DELETE: api/Category/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = SD.Role_Admin + "," + SD.Role_Employee)]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             var category = await _unitOfWork.Category.GetFirstOrDefaultAsync(u => u.Id == id);

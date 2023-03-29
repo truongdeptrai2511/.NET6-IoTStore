@@ -12,7 +12,7 @@ namespace IotSupplyStore.Models
         [StringLength(200)]
         public string Address { get; set; }
         [StringLength(20)]
-        public string citizenIdentification { get; set; } //REQUIRED
+        public string CitizenIdentification { get; set; } //REQUIRED
         
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         public DateTime UpdatedAt { get; set; } = DateTime.Now;
