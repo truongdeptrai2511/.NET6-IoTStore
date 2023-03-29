@@ -112,6 +112,7 @@ namespace IotSupplyStore.Controllers.Employee
         public async Task<IActionResult> CancelOrder(string orderId)
         {
             var orderStatus = await _unitOfWork.OrderStatus.GetFirstOrDefaultAsync(u => u.OrderId == orderId);
+            var order = await _unitOfWork.Order.GetFirstOrDefaultAsync(u => u.Id == orderId);
 
             if (orderStatus == null)
             {
@@ -123,6 +124,11 @@ namespace IotSupplyStore.Controllers.Employee
             }
 
             orderStatus.StatusCancelled = true;
+            order.OrderStatus = false;
+            orderStatus.StatusInProcess = false;
+            orderStatus.StatusApproved = false;
+
+            _unitOfWork.Order.Update(order);
             _unitOfWork.OrderStatus.Update(orderStatus);
             await _unitOfWork.Save();
 
@@ -138,7 +144,7 @@ namespace IotSupplyStore.Controllers.Employee
         {
             var orderStatus = await _unitOfWork.OrderStatus.GetFirstOrDefaultAsync(u => u.OrderId == orderId);
             var order = await _unitOfWork.Order.GetFirstOrDefaultAsync(u => u.Id == orderId);
-
+            // them dieu kien
             if (orderStatus == null)
             {
                 _response.Message = "Not Found";
