@@ -13,7 +13,7 @@ using System.Net;
 
 namespace IotSupplyStore.Controllers.Employee
 {
-    [Authorize(Policy = SD.Role_Shipper)]
+    [Authorize(Roles = SD.Role_Shipper)]
     [ApiController]
     [Route("api/shipper")]
     public class ShipperController : ControllerBase
