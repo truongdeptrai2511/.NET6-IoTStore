@@ -11,7 +11,6 @@ using IotSupplyStore.Repository.IRepository;
 namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
-    [Authorize(Policy = SD.Policy_CategoryManager)]
     [ApiController]
     public class CategoryController : ControllerBase
     {

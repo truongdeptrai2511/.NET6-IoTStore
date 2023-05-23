@@ -12,7 +12,6 @@ namespace IotSupplyStore.Controllers.Admin
 {
     [ApiController]
     [Route("api/order")]
-    [Authorize(Policy = SD.Policy_OrderProcess)]
     public class OrderController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -119,5 +118,56 @@ namespace IotSupplyStore.Controllers.Admin
             _response.ErrorMessages = null;
             return new JsonResult(_response);
         }
+
+        [HttpDelete("delete-order/{productId}/{orderId}")]
+        public async Task<IActionResult> DeleteOrder(string orderId, int productId)
+        {
+            // Lấy thông tin Order từ orderId
+            var order = await _unitOfWork.Order.GetFirstOrDefaultAsync(u => u.Id == orderId);
+
+            if (order == null)
+            {
+                return new JsonResult(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Order not found",
+                    Result = null
+                });
+            }
+
+            // Kiểm tra xem sản phẩm có tồn tại trong Order không
+            var productOrder = await _unitOfWork.ProductOrder.GetFirstOrDefaultAsync(u => u.OrderId == orderId && u.ProductId == productId);
+
+            if (productOrder == null)
+            {
+                return new JsonResult(new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.NotFound,
+                    Message = "Product not found in the order",
+                    Result = null
+                });
+            }
+
+            // Xóa sản phẩm khỏi Order
+            _unitOfWork.ProductOrder.Remove(productOrder);
+            await _unitOfWork.Save();
+
+            // Kiểm tra xem Order còn sản phẩm nào khác hay không
+            var remainingProducts = await _unitOfWork.ProductOrder.GetAllAsync(u => u.OrderId == orderId);
+            if (remainingProducts.Count() == 0)
+            {
+                // Nếu không còn sản phẩm nào trong Order, xóa cả Order
+                _unitOfWork.Order.Remove(order);
+                await _unitOfWork.Save();
+            }
+
+            return new JsonResult(new ApiResponse()
+            {
+                StatusCode = HttpStatusCode.OK,
+                Message = "Order successfully deleted",
+                Result = null
+            });
+        }
+
     }
 }

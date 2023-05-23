@@ -13,7 +13,6 @@ namespace IotSupplyStore.Controllers.Employee
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Policy = SD.Policy_ProductManager)]
     public class ProductController : ControllerBase
     {
         private ApiResponse _response;

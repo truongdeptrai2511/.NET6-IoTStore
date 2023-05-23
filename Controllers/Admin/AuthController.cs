@@ -37,7 +37,7 @@ namespace IotSupplyStore.Controllers.Admin
             _emailService = emailService;
         }
 
-        [Authorize(Policy = SD.Policy_SuperAdmin)]
+        [Authorize(Roles = SD.Role_Admin)]
         [HttpPost("register/admin")]
         public async Task<IActionResult> RegisterAdmin(AdminRegisterRequestDTO model)
         {
